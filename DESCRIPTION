@@ -1,0 +1,23 @@
+Package: ojsr
+Type: Package
+Title: OJS Scraper for R
+Version: 0.0.0.9000
+Authors@R: person("Gaston", "Becerra", email = "gaston.becerra@gmail.com",
+  role = c("aut", "cre"))
+Description: This package allows you scrap content (bibliographic metadata) from OJS front-pages and their OAI interfaces; 
+    This is useful when the OJS Rest API is not available (as in OJS installments prior to v3.1). 
+    It also includes function to parse OJS specific URL conventions. 
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Imports:
+    oai,
+    rvest,
+    stringr,
+    tidyverse,
+    urltools,
+    xml2
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: knitr

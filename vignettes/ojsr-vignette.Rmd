@@ -1,0 +1,46 @@
+---
+title: "ojsr-vignette"
+author: "Gaston Becerra"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{ojsr-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(ojsr)
+```
+
+2do: http://r-pkgs.had.co.nz/vignettes.html
+
+# para que usar este paquete?
+La principal razon para usar este paquete es querer scrapear OJS.
+
+## que es OJS?
+OJS es un motor de publicacion...
+
+## no hay una api?
+Cierto, lo ideal seria poder usar la API Rest de OJS <https://docs.pkp.sfu.ca/dev/api/ojs/3.1> ... pero esta solo esta disponible en OJS v3.1+
+
+anda?
+```{r}
+
+url_sample <- c( 'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903',
+          'http://fundacionmenteclara.org.ar/revista/index.php/RCA/issue/view/2018-Vol3-2',
+          'http://fundacionmenteclara.org.ar/revista/index.php/RCA/article/download/43/54',
+          'https://firstmonday.org/ojs/index.php/fm/article/view/9540',
+          'http://imed.pub/ojs/index.php/iam/article/view/1650',
+          'http://fundacionmenteclara.org.ar/revista/index.php/RCA/oai'
+)
+
+ojsr::process_URL(url_sample)
+```
+
