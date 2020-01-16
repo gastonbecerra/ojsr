@@ -15,22 +15,48 @@ knitr::opts_chunk$set(
 )
 ```
 
-```{r setup}
+```{r setup, include = FALSE}
 library(ojsr)
 ```
 
-2do: http://r-pkgs.had.co.nz/vignettes.html
 
-# para que usar este paquete?
-La principal razon para usar este paquete es querer scrapear OJS.
+# Overview
 
-## que es OJS?
-OJS es un motor de publicacion...
 
-## no hay una api?
-Cierto, lo ideal seria poder usar la API Rest de OJS <https://docs.pkp.sfu.ca/dev/api/ojs/3.1> ... pero esta solo esta disponible en OJS v3.1+
+The aim of this package is to aid scraping metadata (two methods are provided: through web scraping, or through OAI records) and/or downloading full-text files from OJS url(s). 
 
-anda?
+Auxiliary functions are included to parse urls and check if, for example, they point to an issue, article, or galley (usually full-context files).
+
+Most of ojsr functions rely on OJS conventions. They are most likely to fail when used on customized OJS installments (i.e., customized themes) and non-standard OAI records (i.e., when metada has not been well-broomed by the Editor). Also, please notice that only OJS v1 and v2 are considered (see "OJS v3 and OJS API" below).
+
+
+## What's OJS?
+
+
+(from the OJS documentation <https://pkp.sfu.ca/ojs/>, as of Jan.2020)
+
+Open Journal Systems (OJS) is a journal management and publishing system that has been developed by the Public Knowledge Project through its federally funded efforts to expand and improve access to research.
+
+OJS assists with every stage of the refereed publishing process, from submissions through to online publication and indexing. Through its management systems, its finely grained indexing of research, and the context it provides for research, OJS seeks to improve both the scholarly and public quality of refereed research.
+
+OJS is open source software made freely available to journals worldwide for the purpose of making open access publishing a viable option for more journals, as open access can increase a journal’s readership as well as its contribution to the public good on a global scale (see PKP Publications).
+
+
+## OJS v3 and OJS API
+
+
+Isn't a simpler, more reliable way to access meta-data from OJS? Yes, now there is! Since OJS v3.1+ <https://docs.pkp.sfu.ca/dev/api/ojs/3.1> a Rest API is provided, and we're positive a better R interface should use that API instead of web scraping themes and OAI records.
+
+So, why ojsr? Well... According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>, as of 2019 (when v3.1+ was launched), OJS was being used by at least 10,000 journals worldwide. OJS is an excellent free publishing solution for institutions that could not publish otherwise. Presumably, most of them do not have the the technical nor financial capabilities to update constantly, so OJS v1 and v2 are expected to be around for some time. 
+
+
+# How to use ojsr?
+
+
+The most likely case scenario is that you have a bunch of article urls, probably imported from the results of a bibliographic query, and want to get the articles meta-data or the full-context. However, you don't know if these urls are pointing to the article abstract view (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047>) or the actual galley (full-content in pdf, html, epub, etc.) (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047/1050>). ojsr provides both the functions to process the url and to get the meta-data.
+
+These urls could look like these:
+
 ```{r}
 
 url_sample <- c( 'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903',
@@ -41,6 +67,23 @@ url_sample <- c( 'https://publicaciones.sociales.uba.ar/index.php/psicologiasoci
           'http://fundacionmenteclara.org.ar/revista/index.php/RCA/oai'
 )
 
+```
+
+You may use `ojsr::process_URL()` to check them against OJS url conventions, and determine their page type, if they're pointing to a galley, and the OAI url.
+
+```{r}
+
+library(ojsr)
 ojsr::process_URL(url_sample)
+
+```
+
+
+
+```{r}
+
+library(ojsr)
+ojsr::process_URL(url_sample)
+
 ```
 

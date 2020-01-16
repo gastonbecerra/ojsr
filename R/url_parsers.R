@@ -4,6 +4,7 @@
 #' articles and/or galleys, and the (expected) OAI address.
 #'
 #' This fn works by parsing URLs strings against OJS routing conventions.
+#' Of course, this will only work on OJS installations with none or min customization.
 #' It does not check anything against the actual pages!
 #'
 #' @param url String vector.
@@ -16,6 +17,7 @@
 #' @examples
 #' process_URL(c('https://firstmonday.org/ojs/index.php/fm/article/view/9540',
 #'     'http://imed.pub/ojs/index.php/iam/article/view/1650'))
+#' @export
 process_URL <- function( url ) {
 
   # libs: urltools
