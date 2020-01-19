@@ -74,16 +74,20 @@ You may use `ojsr::process_URL()` to check them against OJS url conventions, and
 ```{r}
 
 library(ojsr)
-ojsr::process_URL(url_sample)
+what_type_of_urls <- ojsr::process_URL(url_sample)
+what_type_of_urls
 
 ```
 
-
+Then, you may use `ojsr::process_URL()` to retrieve the url for galleys (usually, full-content and/or supplementary materials), by passing it the *article abstract* pages urls. 
 
 ```{r}
 
-library(ojsr)
-ojsr::process_URL(url_sample)
+library(dplyr) # using dplyr to filter the resulting dataframe, then converting to character vector
+article_view_urls <- what_type_of_urls %>% filter(type=="article_abstract") %>% select(url) %>% unlist(use.names = FALSE)
+article_view_urls
+x<-ojsr::get_fulltext_links(article_view_urls[1])
+x$type[1]
 
 ```
 

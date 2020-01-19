@@ -3,16 +3,16 @@
 #' Processes URLs to check which (if any) OJS view it is, if there are IDs for
 #' articles and/or galleys, and the (expected) OAI address.
 #'
-#' This fn works by parsing URLs strings against OJS routing conventions.
-#' Of course, this will only work on OJS installations with none or min customization.
+#' This fn works by parsing URLs strings against OJS routing conventions
+#' (This will only work on OJS installations with none or min customization)
 #' It does not check anything against the actual pages!
 #'
 #' @param url String vector.
 #' @return A dataframe wich indicates which type of OJS page the URL refers to:
-#'     "article view" usually has the article's abstract, the full-content links and the references;
-#'     "issue" usually has the table of contents (linking to article views);
-#'     "article galley" usually allows you to download or read the article's full-content;
-#'     "oai" indicates that the URL points to the OAI interface.
+#'     - "issue" usually has the table of contents (linking to article views) of a journal's issue;
+#'     - "article view" usually has the article's abstract, the full-content links and the references;
+#'     - "article galley" usually allows you to download or read the article's full-content;
+#'     - "oai" indicates that the URL points to the OAI interface.
 #'     If "article view" or "article galley", the corresponding IDs are returned.
 #' @examples
 #' process_URL(c('https://firstmonday.org/ojs/index.php/fm/article/view/9540',
@@ -57,7 +57,8 @@ process_URL <- function( url ) {
       "index" = { type<-"index" },
       "oai" = { type<-"oai" }
     )
-    urldf <- rbind( urldf , data.frame(type, articleid, galleyid, oai, stringsAsFactors = FALSE, row.names = url[i]) )
+
+    urldf <- rbind( urldf , data.frame(url=url[i],type, articleid, galleyid, oai, stringsAsFactors = FALSE, row.names = NULL) )
   }
   return(as.data.frame(urldf))
 }

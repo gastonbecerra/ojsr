@@ -9,7 +9,7 @@ get_fulltext_links <- function ( url ) {
   ft <- list() # object to return
   for (i in 1:length(url)) { # loop for vectorized url input
     type <- process_URL(url[i])
-    if ( type[1]$type  == "article_abstract") { # proceeds only if in a article view page (although we could proceed also on issue pages...)
+    if ( type$type[1]  == "article_abstract") { # proceeds only if in a article view page (although we could proceed also on issue pages...)
       tryCatch({
         webpage <- xml2::read_html(url[i]) # url page content
         xpath <- './/a[contains(@class, "file") or contains(@class, "obj_galley_link")]' # classes from ojs templates (v2.4.8, v3.1.1)
@@ -23,6 +23,8 @@ get_fulltext_links <- function ( url ) {
     } else {
       warning(paste("non-article url in element",i, url[i]))
       ft[[i]] <- NA
+      # 2do: if not article_abstract, you could do this on an issue, and retrieve all links...
+
     }
   }
   return(ft)
