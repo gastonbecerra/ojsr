@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_metadata_from_page}
 \alias{get_metadata_from_page}
-\title{Scraps meta-data from article/abstract OJS pages}
+\title{Scraps meta-data from article_abstract OJS pages}
 \usage{
 get_metadata_from_page(url, verbose = FALSE)
 }
@@ -16,10 +16,10 @@ A list with every meta-data in the xml_nodeset of the html page.
     You can convert this list to a dataframe using ojsr::metadatalist_to_df
 }
 \description{
-This functions takes an array of OJS article/abstract URLs and browse them to scrap article metadata from their HTML source code.
+This functions takes an array of OJS article_abstract URLs and browse them to scrap article metadata from their HTML source code.
 }
 \details{
-Before scraping, URL is checked to comply to an article/abstract URL convention.
+Before scraping, URL is checked to comply to an article_abstract URL convention.
 Then, this function retrieves all <meta> elements within the <head> section.
 
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)

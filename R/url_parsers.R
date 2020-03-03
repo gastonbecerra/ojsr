@@ -1,61 +1,101 @@
 #' Parses URLs according to OJS conventions
 #'
-#' This function parse a string vector of URLs to check which (if any) OJS view they could be referring to,
-#' if there are IDs for articles and/or galleys,
-#' and the (expected) OAI address.
+#' This function parse a string vector of OJS urls to check which (if any) page/function could be referring to,
+#' if there are IDs for articles, issues or galleys.
+#'
+#' It also returns expected ulrs for the scraping functions.
 #'
 #' This works by parsing URLs strings against OJS routing conventions. It does not check anything against the actual pages!
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
-#' @param url Character vector.
-#' @return A dataframe wich indicates which type of OJS page the url refers to. Please refer to vignette ("Parse OJS urls" section).
+#' @param url Character vector of OJS url(s).
+#' @return A dataframe wich indicates the type of OJS url expected, and the parameters.
+#' Please refer to vignette ("Parse OJS urls" section).
 #' @examples
 #' process_urls(c('https://firstmonday.org/ojs/index.php/fm/article/view/9540',
 #'     'http://imed.pub/ojs/index.php/iam/article/view/1650'))
 #' @export
 process_urls <- function( url ) {
-  urldf <- data.frame()  # object to return
+
+  # 2do: remove the as.integer validation for IDs. i.e., https://fundacionmenteclara.org.ar/revista/index.php/RCA/issue/view/2019-Vol4-1
+  # 2do: include a correction parameter (-1, -2) for ojs_url_basePosition + x, so you can skip journal name in single-OJS installations
+  # 2do: expect should be written in a human-readable way (view article, download galley)
+
+  if( !is.character(url) ) { error("url must be a character string or vector") }
+
+  ojs_url_dataframe <- data.frame()  # object to return
+
   for (i in 1:length(url)) { # in a loop for vectorized input
-    type <- NA; articleid <- NA; galleyid <- NA; oai <- NA # default values
-    tryCatch({
-      ( urlparse <-  urltools::url_parse(url[i]) ) # parse url to check if proper url
-      ( urlpath <- urlparse$path ) # path (-domain) of url provided
-      ( urldomain <- substr(url[i] , 1 , (regexpr(pattern = urlpath, text = url[i], fixed = TRUE)[1] )-1) )
-      ( urlsplit <- unlist(strsplit(x = urlpath, split = "/", fixed = TRUE)) ) # split url by "/"
-      ( ojsbase <- match("index.php", urlsplit) ) # "index.php" url segment should indicate OJS installation
-      ( oai <- paste0(urldomain , paste(urlsplit[1:(ojsbase+1)], collapse = "/"), "/oai") )
-      # urlsplit[ojsbase+1] # OJS journal base folder
-      # urlsplit[ojsbase+2] # OJS router/view == article, issue, index, about ....
-      # urlsplit[ojsbase+4] # OJS article/issue id
-      # urlsplit[ojsbase+5] # OJS galley id
-      switch( urlsplit[ojsbase+2],
-        "article" = { # if is an article ...
-          switch( urlsplit[ojsbase+3],
-            "view" = {  # ... viewing article == abstract, download, etc.
-              articleid <- as.integer(urlsplit[ojsbase+4]) # article id
-              galleyid <- as.integer(urlsplit[ojsbase+5]) # galley id (NA if none)
-              if ( is.na(galleyid) && !is.na(articleid) ) { type <- "article_abstract" }
-              else if ( !is.na(galleyid) && !is.na(articleid) ) { type <- "article_galley" }
-              else { type <- NA } } ,
-            "download" = {
-              articleid <- as.integer(urlsplit[ojsbase+4]) # article id
-              galleyid <- as.integer(urlsplit[ojsbase+5]) # galley id (NA if none)
-              if ( is.na(galleyid) && !is.na(articleid) ) { type <- NA } # you can only download a galley
-              else if ( !is.na(galleyid) && !is.na(articleid) ) { type <- "download_galley" }
-              else { type <- NA } }
-          )},
-        "issue" = { type<-"issue" },
-        "about" = { type<-"about" },
-        "index" = { type<-"index" },
-        "oai" = { type<-"oai" }
-      )
-    },
-    error = function(cond) {
-      message(paste("URL ", i, url[i], "caused error. NA assigned."))
+
+    ojs_url <- list() # object to populate. converts to df before returning
+
+    urlposta <- url[i] # input parameter
+    ojs_url$url <- urlposta # input parameter
+    ojs_url$expect <- ojs_url$command <- ojs_url$page  <- NA_character_
+    ojs_url$articleId <- ojs_url$galleyId <- ojs_url$issueId <- NA
+    ojs_url$assume_issueArchive <- ojs_url$assume_searchResults <- ojs_url$assume_oai <- ojs_url$assume_issueToc <- ojs_url$assume_articleView <- NA
+
+    ojs_url_parsed <- urltools::url_parse(urlposta) # parsing non-ojs url conventions
+    ojs_url_path <- urltools::path(urlposta) # url - domain = /index.php/journal/page/function/arg1/arg2/arg3
+    urlsplit <- unlist(strsplit(x = ojs_url_path, split = "/", fixed = TRUE)) # split url by "/"
+
+    if (!grepl(pattern = "^https?://", x = urlposta)) { warning( paste(urlposta , "(element ", i ,")", " does not include http|https protocol") ) }
+    if (!grepl(pattern = "index.php", x = urlposta, fixed = TRUE)) { warning( paste(urlposta , "(element ", i ,")", " does not include index.php") ) }
+    if (!grepl(pattern = "/search", x = urlposta, fixed = TRUE) && !is.na(ojs_url_parsed$parameter)) { warning( paste(urlposta , "(element ", i ,")", " includes paramenters in url") ) }
+
+    ojs_url_basePosition <- match("index.php", urlsplit) # "index.php" url segment
+
+    ojs_url_baseUrl <- NA # base url to rewrite (the "assume" paramenters returned)
+    ojs_url_directory <- ifelse( ojs_url_basePosition > 1, paste( urlsplit[1:ojs_url_basePosition-1] , collapse = "/"), NA ) # directory of installation
+    ojs_url_journalName <- urlsplit[ ojs_url_basePosition + 1 ] # abv name of the jounal
+    ojs_url_baseUrl <- paste0( ojs_url_parsed$scheme , "://" , ojs_url_parsed$domain)
+    if ( !is.na(ojs_url_parsed$port )) { ojs_url_baseUrl <- paste0( ojs_url_baseUrl , ":" , ojs_url_parsed$port) }
+    if ( !is.na(ojs_url_directory )) { ojs_url_baseUrl <- paste0( ojs_url_baseUrl , "/" , ojs_url_directory) }
+    if ( !is.na( ojs_url_basePosition )) { ojs_url_baseUrl <- paste0( ojs_url_baseUrl , "/index.php") }
+    if ( !is.na( ojs_url_journalName )) { ojs_url_baseUrl <- paste0( ojs_url_baseUrl , "/" , ojs_url_journalName) }
+    ojs_url$baseUrl <- ojs_url_baseUrl
+
+    if ( !is.na ( urlsplit[ ojs_url_basePosition + 2 ] ) ) { ojs_url$page <- urlsplit[ ojs_url_basePosition + 2 ] } # page/controller = about, user, article, issue, search, etc.
+    if ( !is.na ( urlsplit[ ojs_url_basePosition + 3 ] ) ) { ojs_url$command <- urlsplit[ ojs_url_basePosition + 3 ] } # function = view, download, index, search, etc.
+
+    if ( ojs_url$page == "article" && ( ojs_url$command == "view" || ojs_url$command == "download" ) ) {
+      if ( !is.na ( as.integer( urlsplit[ ojs_url_basePosition + 4 ] )) ) { ojs_url$articleId = as.integer(urlsplit[ ojs_url_basePosition + 4 ]) } # there is an article id
+      if ( !is.na ( as.integer( urlsplit[ ojs_url_basePosition + 5 ] )) ) { ojs_url$galleyId = as.integer(urlsplit[ ojs_url_basePosition + 5 ]) } # there is an galley id
+      if ( !is.na ( ojs_url$articleId ) && is.na( ojs_url$galleyId ) ) { ojs_url$expect <- "article view" } # url points to article view (abstract)
+      if ( !is.na ( ojs_url$articleId ) && !is.na( ojs_url$galleyId ) && ojs_url$command == "view" ) { ojs_url$expect <- "galley view" } # url points to article galley view (probably inline reader)
+      if ( !is.na ( ojs_url$articleId ) && !is.na( ojs_url$galleyId ) && ojs_url$command == "download" ) { ojs_url$expect <- "galley download" } # url forces download of article galley (probably pdf)
     }
-    )
-    urldf <- rbind( urldf , data.frame(url=url[i],type, articleid, galleyid, oai, stringsAsFactors = FALSE, row.names = NULL) )
+
+    if ( ojs_url$page == "issue" && ( ojs_url$command == "current" || ojs_url$command == "view" || ojs_url$command == "archive" ) ) {
+      if ( !is.na ( as.integer( urlsplit[ ojs_url_basePosition + 4 ] )) ) { ojs_url$issueId = as.integer(urlsplit[ ojs_url_basePosition + 4 ]) } # there is an issue id
+      if ( ojs_url$command == "current" ) { ojs_url$expect <- "current issue" } # url may be directing to current issue cover page
+      if ( ojs_url$command == "view" && !is.na( ojs_url$issueId ) ) { ojs_url$expect <- "view issue -> showToc" ; } # url may be directing to issue cover page
+      if ( ojs_url$command == "archive" ) { ojs_url$expect <- "issue archive view" } # url is redirecting issue archive list
+    }
+
+    if ( ojs_url$page == "oai" ) {
+      ojs_url$expect <- "oai"; # url is redirecting to oai protocol
+    }
+
+    if ( ojs_url$page == "search" ) {
+      ojs_url$expect <- "search"; # url is pointing to search form/ results
+      # 2do: search form or result?
+      # https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/search/search?simpleQuery=becerra&searchField=query
+    }
+
+    ojs_url$assume_issueArchive <- paste0(ojs_url_baseUrl , "/issue/archive")
+    ojs_url$assume_searchResults <- paste0(ojs_url_baseUrl , "/search/search")
+    ojs_url$assume_oai <- paste0(ojs_url_baseUrl , "/oai")
+    ojs_url$assume_issueToc <- ifelse(!is.na(ojs_url$issueId), paste0(ojs_url_baseUrl , "/issue/", ojs_url$issueId , "/showToc"), NA)
+    ojs_url$assume_articleView <- ifelse(!is.na(ojs_url$articleId), paste0(ojs_url_baseUrl , "/article/view/", ojs_url$articleId), NA)
+
+    # rm(ojs_url_parsed , ojs_url_path , ojs_url_basePosition , ojs_url_baseUrl, ojs_url_directory, ojs_url_journalName, urlsplit)
+
+    ojs_url_row <- as.data.frame( t(unlist(ojs_url)), stringsAsFactors = FALSE)
+    ojs_url_dataframe <- rbind(ojs_url_dataframe, ojs_url_row)
+    #glimpse(ojs_url_row)
+
   }
-  return(as.data.frame(urldf))
+  return(ojs_url_dataframe)
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_galley_urls}
 \alias{get_galley_urls}
-\title{Scraps the galley(s) url(s) from article/abstract OJS pages}
+\title{Scraps the galley(s) url(s) from article_abstract OJS pages}
 \usage{
 get_galley_urls(url, verbose = FALSE)
 }
@@ -15,14 +15,14 @@ get_galley_urls(url, verbose = FALSE)
 A dataframe with the urls of the galleys linked from the OJS article page. (Please refer to vignette for structure)
 }
 \description{
-This functions takes an array of OJS article/abstract URLs and scrap the galley(s) url from their links.
+This functions takes an array of OJS article_abstract URLs and scrap the galley(s) url from their links.
 }
 \details{
 "Galleys" are the public (and usually full-content) copies of the articles. Usual formats for galleys are pdf, xml, html, rtf, epub.
 These may also include supplementary materials (dataset, charts, etc.).
 
-Before scraping, URL is checked to comply to an article/abstract URL convention.
-Then, this function retrieves all the hrefs from links with usual OJS classes (e.g., #obj_galley_link)
+Before scraping, URL is checked to comply to an article_abstract URL convention.
+Then, this function retrieves all the hrefs from links with usual OJS classes (e.g., .obj_galley_link)
 
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 }

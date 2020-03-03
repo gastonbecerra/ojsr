@@ -147,28 +147,75 @@ get_galley_urls <- function ( url , verbose = FALSE) {
 #'     'https://firstmonday.org/ojs/index.php/fm/issue/view/634'))
 #' @export
 get_articles_urls_from_issue <- function ( url , verbose = FALSE) {
-  galleyList <- list() # object to collect
+
+  # 2do: lo primero: validar que url sea un vector y no un df, ni 3 carajos
+
+  url2 <- url
+
   galleyDataframe <- data.frame() # object to collect
   for (i in 1:length(url)) { # loop for vectorized url input
     if (verbose) { message(paste("trying URL ", i, url[i])) }
-    url_type <- ojsr::process_urls(url[i])
-    if ( url_type$type[1] == "issue") { # proceeds only if in an issue
-      tryCatch({
-        webpage <- xml2::read_html(url[i]) # url page content
+
+    # falta validar
+
+    # 2do: para no quedarse en la cover, hay que forzar el showToc
+    ifelse ( grepl(pattern = "showToc", x = url[i], fixed = TRUE) , url2[i] <- url[i] , url2[i] <- paste0(url[i],"/showToc") )
+
+    tryCatch({
+        webpage <- xml2::read_html(url2[i]) # url page content
         xpath <- '//a[contains(@href, "/article/view/") and not(contains(@class, "file"))]'
-        meta_data_tags <- rvest::html_nodes(webpage, xpath = xpath)
-        galleyLinks <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href")
-        galleyDataframe <- rbind( galleyDataframe , data.frame(cbind(galleyLinks, url[i] ), stringsAsFactors = FALSE) )
+        links <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href")
+        galleyDataframe <- rbind( galleyDataframe , data.frame(cbind(links, url[i] ), stringsAsFactors = FALSE) )
+
       }, warning = function(war) { print(paste("WARNING in element ", i, " : ",war)) ; galleyList[[i]] <- NA ;
       }, error = function(err) { print(paste("ERROR in element ", i, " : ",err)); galleyList[[i]] <- NA ;
       })
-    } else {
-      warning(paste("non-article url in element",i, url[i]))
-      #galleyList[[i]] <- NA
-      #2do: iria vacio?
+
     }
-  }
+  names(galleyDataframe)[1] <- "links"
   names(galleyDataframe)[2] <- "url"
   return(galleyDataframe)
 }
 
+
+
+
+
+#' Scraps an OJS archive page for issues urls
+#'
+#' This functions takes an array of OJS archive URLs and scrap the issue urls from their links.
+#'
+#' Before scraping, URL is checked to comply to an OJS archive URL convention.
+#' Then, this function retrieves all the hrefs from links with usual OJS classes (e.g., a.tocTitle)
+#'
+#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+#'
+#' @param url Character vector.
+#' @param verbose Logical.
+#' @return A dataframe with the urls of the articles linked from the OJS issue page.
+#' @examples
+#' get_articles_urls_from_issue(c('https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/319/showToc',
+#'     'https://firstmonday.org/ojs/index.php/fm/issue/view/634'))
+#' @export
+get_issue_urls_from_archive <- function ( url , verbose = FALSE) {
+  archiveDataframe <- data.frame() # object to collect
+  for (i in 1:length(url)) { # loop for vectorized url input
+    if (verbose) { message(paste("trying URL ", i, url[i])) }
+    url_type <- ojsr::process_urls(url[i])
+
+      # falta chequear que sea archive
+
+      tryCatch({
+        webpage <- xml2::read_html(url[i]) # url page content
+        xpath <- '//a[contains(@href, "/issue/view/")]'
+        archiveLinks <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href") %>% unique()
+        archiveDataframe <- rbind( archiveDataframe , data.frame(cbind(archiveLinks, url[i] ), stringsAsFactors = FALSE) )
+      }, warning = function(war) { print(paste("WARNING in element ", i, " : ",war)) ; galleyList[[i]] <- NA ;
+      }, error = function(err) { print(paste("ERROR in element ", i, " : ",err)); galleyList[[i]] <- NA ;
+      })
+
+  }
+  names(archiveDataframe)[1] <- "links"
+  names(archiveDataframe)[2] <- "url"
+  return(archiveDataframe)
+}

@@ -16,7 +16,6 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, include = FALSE}
-#library(ojsr)
 library(knitr)
 ```
 
@@ -30,13 +29,15 @@ The aim of this package is to aid retrieve/scraping meta-data and/or accessing g
 
 This package currently provides:
 
-- 1 function (**process_urls**) to parse OJS ulrs, according to OJS routing conventions, to identify what type of page are they pointing to;
+- 1 function (**process_urls**) to parse OJS ulrs, according to OJS routing conventions, to identify what type of page are they pointing at, and to rewrite the expected url for each scrapping task;
 - 1 function (**get_metadata_from_page**) to collect meta-data from OJS articles page (via html scraping)
 - 1 function (**get_galley_urls**) to retrieve meta-data from OJS article OAI record
 
 It is intended that this package will include:
 
-- 1 function to crawl archive and issue(s)
+- 1 function to crawl archive
+- 1 function to crawl issue(s)
+- 1 function to crawl search results
 - some auxiliary functions (to identify OJS version (via generator metatag), to store/download full-text files, etc.)
 - 1 dataset of handy codes for scraping
 
@@ -62,9 +63,13 @@ OJS is open source software made freely available to journals worldwide for the 
 
 ## OJS v3 and OJS API
 
-There is not a simpler, more reliable (less conventional!), way to access meta-data from OJS? Yes, there is! Since OJS v3.1+ <https://docs.pkp.sfu.ca/dev/api/ojs/3.1> a Rest API is provided, and we're positive a better R interface should use that API instead of web scraping themes and OAI records.
+There is not a simpler, more reliable (less conventional!), way to access meta-data from OJS? 
 
-So, why ojsr? Well... According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>, as of 2019 (when v3.1+ was launched), OJS was being used by at least 10,000 journals worldwide. OJS is an excellent free publishing solution for institutions that could not publish otherwise. Presumably, most of them do not have the the technical nor financial capabilities to update constantly, so OJS v1 and v2 are expected to be around for quite some time... 
+Yes, there is! Since OJS v3.1+ <https://docs.pkp.sfu.ca/dev/api/ojs/3.1> a Rest API is provided, and we're positive a better R interface should use that API instead of web scraping themes and OAI records.
+
+So, why ojsr? 
+
+Well... According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>, as of 2019 (when v3.1+ was launched), OJS was being used by at least 10,000 journals worldwide. OJS is an excellent free publishing solution for institutions that could not publish otherwise. Presumably, most of them do not have the the technical nor financial capabilities to update constantly, so OJS v1 and v2 are expected to be around for quite some time... 
 
 
 
@@ -72,18 +77,15 @@ So, why ojsr? Well... According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>
 
 
 
-## process_urls: Parse OJS urls to predict what type of page they point to
+## process_urls: Parse urls to check what type of OJS page they point to
 
-The most likely case scenario is that you have a bunch of article urls, probably imported from the results of a bibliographic query, and want to get the articles meta-data or the full-context. However, since you can do different tasks with these (e.g., you can not scrap metadata from pdf galleys), you first need to know what type of pages are your urls referring to. 
+Let's say you have a bunch of OJS specific article urls you'd like to scrap their meta-data, or a curated list of journals you'd like to crawl completely. However, not all of them may be poiting to the *right* type of OJS page for your purposes (e.g., articles may be pointing at the PDF galley to download wherein you can not scrap meta-data, or the issues may be pointing at cover pages that do not include ToCs). 
 
-You may use `process_urls()` to parse a list of urls against OJS *routing conventions* (pages are visited actually!) to determine their type. 
+`process_urls()` allows you to parse a list of urls against OJS **routing conventions** to determine what type of page are they pointing at, which parameters are invoked (e.g., article, issues, galley IDs). 
 
-ojsr recognizes 4 types of urls:
+Also, it will generate the *(assumed to be) right* url for specific purposes, such as scraping meta-data, or scraping the list of issues for the archive of issues page. That's why `process_urls()` can be invoked before the scraping functions if you are not sure about the list of urls you already have (see the example code for `get_issue_urls_from_archive()`). 
 
-- *article_abstract* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047>) pointing to a page with the title of the article, the abstract, and the links to "galleys" (full-content text) and supplementary materials
-- *download_galley* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047/1050>) pointing to full-content in pdf, html, epub, etc. This may or may not force download
-- *issue* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/issue/view/91>) pointing to a full issue of a journal
-- *oai* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/oai>) pointing to the entry page of the oai protocol
+Please keep in mind that since we are working with **routing conventions** (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>), these pages are not actually browsed.
 
 Your urls could look like these:
 
@@ -94,110 +96,59 @@ url_sample <- c( 'https://publicaciones.sociales.uba.ar/index.php/psicologiasoci
           'http://fundacionmenteclara.org.ar/revista/index.php/RCA/article/download/43/54',
           'https://firstmonday.org/ojs/index.php/fm/article/view/9540',
           'http://imed.pub/ojs/index.php/iam/article/view/1650',
-          'http://fundacionmenteclara.org.ar/revista/index.php/RCA/oai'
+          'http://fundacionmenteclara.org.ar/revista/index.php/RCA/oai',
+          'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/444',
+          'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/search/search?query=complejidad'
 )
 
 ```
 
 We'll parse them, and store the result in a dataframes (`what_type_of_urls`)
 
-```{r}
+```{r message=FALSE}
 
+library(tidyverse) # we'll use dplyr and tidy several times in the vignette
 library(ojsr) 
-
 what_type_of_urls <- ojsr::process_urls(url_sample)
-what_type_of_urls
-
+glimpse(what_type_of_urls)
 
 ```
 
-## get_metadata_from_page: Scrap meta-data from OJS article_abstract pages
+The resulting dataframe contains the following:
 
-If you have a list of OJS *article_abstract* urls you can scrap their meta-data, by parsing the head section of their html.
+1. *url* - the url provided
+2. *page* - the page class the url is pointing at (article, issue, oai, search, etc.)
+3. *command* - the name of the function within the page (view, download, search, etc.)
+4. *expect* - what you could do at this page; usually a combination of command + page or a variant (view article, download galley)
+5. 
 
-In the last section we created a dataframe of OJS urls `what_type_of_urls`. In the following, we are only keeping those pointing to *article_abstract* pages. Then, we're scrapping their meta-data with `get_metadata_from_page`. 
+- *article_abstract* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047>) pointing at a page with the title of the article, the abstract, and the links to "galleys" (full-content text) and supplementary materials
+- *download_galley* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047/1050>) pointing at full-content in pdf, html, epub, etc. This may or may not force download
+- *issue* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/issue/view/91>) pointing at a full issue of a journal
+- *oai* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/oai>) pointing at the entry page of the oai protocol
 
-Since this retrieves a (probably quite large and unconfortable) list, we'll then use `metadata_list_to_df` to convert it to a dataframe, in a long tidyish format: name of meta-tag, content, scheme, xml:lang, and url of the article's page. (Please note this last step may drop some meta-data, by keeping only those with a name/content pair).
 
+## get_issue_urls_from_archive: Retrieve issues urls from issue/archive pages
+
+Let's say you want to crawl a few journals in order to list their issues, so you can latter iterate through them and scrap their articles' meta-data. We can use `get_issue_urls_from_archive()` for that. 
+
+`get_issue_urls_from_archive()` requires a list OJS urls pointing at the archive of issues of each journal (e.g., <https://papiro.unizar.es/ojs/index.php/rc51-jos/issue/archive>). 
+
+However, if you provide the url of any pages of the OJS, `get_issue_urls_from_archive()` can take the *assumed-to-be-right* url, by calling to `process_urls()` internally. In the following example, we are providing a short list of OJS urls, mixing both the archive of issues and home pages.
 
 ```{r}
 
-# let's keep only the urls pointing to article_abstract pages (type==article_abstract)
+# let's start by providing a mix
 
-article_view_urls <- unlist( what_type_of_urls[which(what_type_of_urls$type=="article_abstract"),"url"] , use.names = FALSE) 
-article_view_urls
+socPsy_urls <- c( # a few argentinian social psychology journals 
+  'http://sportsem.uv.es/j_sports_and_em/index.php/rips/', # home page of journal, including ToC of current issue
+  'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive', # archive of issues
+  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/526' # a particular issue's cover page (no ToC)
+)
 
-# now let's scrap their meta-data ...
-
-metadata_from_articles <- ojsr::get_metadata_from_page( article_view_urls )
-
-# ... and convert them to a dataframe, for easier reading
-
-metadata_from_articles_df <- ojsr::metadata_list_to_df( metadata_from_articles, article_view_urls )
-
-str(metadata_from_articles_df)
-
-```
-
-This is the material you'll use for further analysis. I.e., you could plot the year of publication of your articles: 
-
-```{r fig.height=2, fig.width=2, message=FALSE}
-
-library(tidyverse) # we'll use dplyr and ggplot
-library(lubridate) # we'll parse some years
-metadata_from_articles_df %>% filter(name=="DC.Date.created") %>% # we'll be keeping only the Dublin Core creation date records ...
-  transform(y=lubridate::year(content)) %>% # ... and extract the year ...
-  group_by(y) %>% tally() %>%  # ... to calculate frequencies of year publication ...
-    ggplot(aes(x=y,y=n)) + geom_col() + theme_light() # ... and finally plot it
-
-```
-
-## get_galley_urls: Retrieve galley(s) (full-content and supplementary material) urls from article_abstract pages
-
-Another task you can perform on *article_abstract* pages is to retrieve the galley(s) (usually full-content and suplementary materials) to view/download.
-
-In the first section we created a dataframe of OJS urls `what_type_of_urls`. In the following, we are only keeping those pointing to *article_abstract* pages. Then, we're scrapping them to retrieve the galley(s) url with `get_galley_urls`. 
-
-```{r}
-
-# let's keep only the urls pointing to article_abstract pages (type==article_abstract)
-
-article_view_urls <- unlist( what_type_of_urls[which(what_type_of_urls$type=="article_abstract"),"url"] , use.names = FALSE) 
-article_view_urls
-
-# now let's scrap them to retrieve the galley(s) url ...
-
-galleys_urls <- ojsr::get_galley_urls( article_view_urls )
-galleys_urls
-
-```
-
-The resulting dataframe includes:
-
-- *galley_url* = url to view/download galley file (OJS will show the galley if they have a reader plugin; otherwise it will force download)
-- *galley_force_download* = url that forces download of the galley file 
-- *galley_format* = the declared format of the galley (usually, either an usual format for full-content, such as pdf, epub, xml; or the title of the supplementary file)
-- *url* = the url of the OJS *article_abstract* page
+# let's use get_issue_urls_from_archive to retrieve the issues url from the archive of issue page of these OJS
+# we'll allow get_issue_urls_from_archive to use the assummed url 
 
 
-## get_articles_urls_from_issue: Retrieve article urls from issues pages
-
-
-```{r}
-
-# let's start by providing a bunch of urls of OJS issue pages
-
-issues_url <- c('https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/319/showToc',
-  'https://firstmonday.org/ojs/index.php/fm/issue/view/634')
-
-# let's ???
-
-what_type_of_urls <- ojsr::process_urls(issues_url[1])
-what_type_of_urls
-
-# let's ???
-
-galleyLinks <- ojsr::get_articles_urls_from_issue(issues_url[1])
-galleyLinks
 
 ```

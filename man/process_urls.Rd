@@ -7,17 +7,19 @@
 process_urls(url)
 }
 \arguments{
-\item{url}{Character vector.}
+\item{url}{Character vector of OJS url(s).}
 }
 \value{
-A dataframe wich indicates which type of OJS page the url refers to. Please refer to vignette ("Parse OJS urls" section).
+A dataframe wich indicates the type of OJS url expected, and the parameters.
+Please refer to vignette ("Parse OJS urls" section).
 }
 \description{
-This function parse a string vector of URLs to check which (if any) OJS view they could be referring to,
-if there are IDs for articles and/or galleys,
-and the (expected) OAI address.
+This function parse a string vector of OJS urls to check which (if any) page/function could be referring to,
+if there are IDs for articles, issues or galleys.
 }
 \details{
+It also returns expected ulrs for the scraping functions.
+
 This works by parsing URLs strings against OJS routing conventions. It does not check anything against the actual pages!
 
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
