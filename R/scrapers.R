@@ -82,13 +82,7 @@ metadata_list_to_df <- function( metadataList, url ){
 
 #' Scraps the galley(s) url(s) from article_abstract OJS pages
 #'
-#' This functions takes an array of OJS article_abstract URLs and scrap the galley(s) url from their links.
-#'
-#' "Galleys" are the public (and usually full-content) copies of the articles. Usual formats for galleys are pdf, xml, html, rtf, epub.
-#' These may also include supplementary materials (dataset, charts, etc.).
-#'
-#' Before scraping, URL is checked to comply to an article_abstract URL convention.
-#' Then, this function retrieves all the hrefs from links with usual OJS classes (e.g., .obj_galley_link)
+#' This functions takes an array of OJS urls pointing to articles pages and scrap the galley(s) url from their links.
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
@@ -148,7 +142,6 @@ get_galley_urls <- function ( url , verbose = FALSE) {
 #' @export
 get_articles_urls_from_issue <- function ( url , verbose = FALSE) {
 
-  # 2do: lo primero: validar que url sea un vector y no un df, ni 3 carajos
 
   url2 <- url
 
@@ -183,39 +176,94 @@ get_articles_urls_from_issue <- function ( url , verbose = FALSE) {
 
 #' Scraps an OJS archive page for issues urls
 #'
-#' This functions takes an array of OJS archive URLs and scrap the issue urls from their links.
-#'
-#' Before scraping, URL is checked to comply to an OJS archive URL convention.
-#' Then, this function retrieves all the hrefs from links with usual OJS classes (e.g., a.tocTitle)
+#' This functions takes an array of OJS archive URLs and scrap the issue urls.
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
 #' @param url Character vector.
+#' @param method String. Available methods: scrap_by_href_convention
 #' @param verbose Logical.
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
 #' @examples
 #' get_articles_urls_from_issue(c('https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/319/showToc',
 #'     'https://firstmonday.org/ojs/index.php/fm/issue/view/634'))
 #' @export
-get_issue_urls_from_archive <- function ( url , verbose = FALSE) {
-  archiveDataframe <- data.frame() # object to collect
+get_issue_urls_from_archive <- function ( url , verbose = FALSE , method = "scrap_by_href_convention") {
+  df <- ojrs_scrap(url = url, verbose = verbose, method = method, from = "get_issue_urls_from_archive")
+  return(df)
+}
+
+
+
+
+ojrs_scrap <- function (url , verbose , method, from) {
+
+  # ---------- validation
+
+  if ( !is.character(url) ) { stop("url must be a character string/vector", call. = FALSE) }
+  if ( !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
+  if ( !is.character(method) ) { stop("method must be a character string", call. = FALSE) }
+
+  # ---------- preparation
+
+  df <- data.frame() # object to collect
+  li <- list() # object to collect
+
+  # ---------- iterate through url list
+
   for (i in 1:length(url)) { # loop for vectorized url input
-    if (verbose) { message(paste("trying URL ", i, url[i])) }
+
+    if (verbose) { message(paste("trying URL ", i, "/" , length(url), url[i])) }
+
+    # ---------- validate the url and warn
+
     url_type <- ojsr::process_urls(url[i])
 
-      # falta chequear que sea archive
+    # 2do: aca faltan comprobaciones y ver que hacemos con esto...
 
-      tryCatch({
-        webpage <- xml2::read_html(url[i]) # url page content
-        xpath <- '//a[contains(@href, "/issue/view/")]'
-        archiveLinks <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href") %>% unique()
-        archiveDataframe <- rbind( archiveDataframe , data.frame(cbind(archiveLinks, url[i] ), stringsAsFactors = FALSE) )
-      }, warning = function(war) { print(paste("WARNING in element ", i, " : ",war)) ; galleyList[[i]] <- NA ;
-      }, error = function(err) { print(paste("ERROR in element ", i, " : ",err)); galleyList[[i]] <- NA ;
-      })
+    # ---------- read page
 
+    tryCatch({
+      webpage <- ""
+      webpage <- xml2::read_html(url[i]) # url page content
+      if ( webpage != "" ) {
+
+        # ---------- scrap and process content
+
+        switch ( method,
+
+          "scrap_by_href_convention" = {
+
+            # 2do: de acuerdo al metodo y el from, hay distintos xpath y distintos post-procesamientos
+
+              xpath <- '//a[contains(@href, "/issue/view/")]'
+              archiveLinks <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href") %>% unique()
+              archiveDataframe <- rbind( archiveDataframe , data.frame(cbind(archiveLinks, url[i] ), stringsAsFactors = FALSE) )
+
+
+          },
+
+          stop("no valid method provided")
+        )
+
+        # metemos el resultado
+
+
+
+
+      } else {
+        warning(paste("no content in ", url[i]))
+      }
+    }, warning = function(war) { warning(paste("warning reading ", url[i], " : ",war)) ;
+    }, error = function(err) { warning(paste("error reading ", url[i], " : ",err));
+    })
   }
   names(archiveDataframe)[1] <- "links"
   names(archiveDataframe)[2] <- "url"
+
+
+  # Before scraping, URL is checked to comply to an OJS archive URL convention.
+  # Then, this function retrieves all the hrefs from links with usual OJS classes (e.g., a.tocTitle)
+
   return(archiveDataframe)
 }

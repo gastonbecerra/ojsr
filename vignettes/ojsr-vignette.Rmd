@@ -29,7 +29,7 @@ The aim of this package is to aid retrieve/scraping meta-data and/or accessing g
 
 This package currently provides:
 
-- 1 function (**process_urls**) to parse OJS ulrs, according to OJS routing conventions, to identify what type of page are they pointing at, and to rewrite the expected url for each scrapping task;
+- 1 function (**process_urls**) to parse OJS ulrs, according to OJS routing conventions, to identify what type of page are they pointing at, and to write the expected url for each scrapping task;
 - 1 function (**get_metadata_from_page**) to collect meta-data from OJS articles page (via html scraping)
 - 1 function (**get_galley_urls**) to retrieve meta-data from OJS article OAI record
 
@@ -44,14 +44,12 @@ It is intended that this package will include:
 
 ## Important! 
 
-Please keep in mind:
-
-- **Most of ojsr functions rely heavily on OJS conventions and default themes**, and therefore are most likely to fail when used on customized OJS installments (i.e., customized themes, routing "improvements" via .htaccess) and non-compliant OJS configuration and record keeping (i.e., when metadata has not been well-broomed by the Editor/Publisher, or OAI records do not follow standards). 
-- Also, please notice that only **common OJS v1 and v2 convensions** are considered (see "OJS v3 and OJS API" below).
+- Most of ojsr functions **rely on OJS conventions and default themes**, and therefore are most likely to fail when used on customized OJS installments (i.e., customized themes, routing improvements via .htaccess), and also on non-compliant OJS configuration and record keeping (i.e., when metadata has not been well-broomed by the Editor/Publisher, or OAI records do not follow standards). 
+- Also, please notice that only **common OJS v1 and v2 conventions** are considered (see "OJS v3 and OJS API" below).
 
 
 
-## What's OJS?
+## About OJS
 
 (from the OJS documentation <https://pkp.sfu.ca/ojs/>, as of Jan.2020)
 
@@ -60,6 +58,8 @@ Open Journal Systems (OJS) is a journal management and publishing system that ha
 OJS assists with every stage of the refereed publishing process, from submissions through to online publication and indexing. Through its management systems, its finely grained indexing of research, and the context it provides for research, OJS seeks to improve both the scholarly and public quality of refereed research.
 
 OJS is open source software made freely available to journals worldwide for the purpose of making open access publishing a viable option for more journals, as open access can increase a journal’s readership as well as its contribution to the public good on a global scale (see PKP Publications).
+
+
 
 ## OJS v3 and OJS API
 
@@ -75,22 +75,25 @@ Well... According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>, as of 2019 (
 
 # How to use ojsr?
 
+## process_urls: Parse urls to check what type of OJS page they point at
+
+Let's say you have a bunch of OJS specific article urls you'd like to scrap their meta-data, or a curated list of journals you'd like to crawl completely. However, not all of them may be poiting to the *right* type of OJS page for your purposes (e.g., articles url you collected may be downloading pdf directly, so you won't be able to scrap meta-data, or the issues may be pointing at cover pages that do not include ToCs). 
+
+`process_urls()` allows you to parse a**list of urls against OJS routing conventions** and determine what type of page are they pointing at, which parameters are invoked (e.g., article, issues, galley IDs), and generate the *(assumed to be) right* url for specific purposes, such as scraping meta-data, or scraping the list of issues for the archive of issues page. Most of the times `process_urls()` is invoked before the scraping functions (see the example code for `get_issue_urls_from_archive()`). 
+
+Please keep in mind that `process_urls()` works with **routing conventions** (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>). The list of urls you input is not actually browsed.
 
 
-## process_urls: Parse urls to check what type of OJS page they point to
-
-Let's say you have a bunch of OJS specific article urls you'd like to scrap their meta-data, or a curated list of journals you'd like to crawl completely. However, not all of them may be poiting to the *right* type of OJS page for your purposes (e.g., articles may be pointing at the PDF galley to download wherein you can not scrap meta-data, or the issues may be pointing at cover pages that do not include ToCs). 
-
-`process_urls()` allows you to parse a list of urls against OJS **routing conventions** to determine what type of page are they pointing at, which parameters are invoked (e.g., article, issues, galley IDs). 
-
-Also, it will generate the *(assumed to be) right* url for specific purposes, such as scraping meta-data, or scraping the list of issues for the archive of issues page. That's why `process_urls()` can be invoked before the scraping functions if you are not sure about the list of urls you already have (see the example code for `get_issue_urls_from_archive()`). 
-
-Please keep in mind that since we are working with **routing conventions** (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>), these pages are not actually browsed.
+```{r}
+# let's start by loading the libraries
+library(ojsr) 
+library(tidyverse) # we'll use dplyr and tidy several times in the examples
+```
 
 Your urls could look like these:
 
 ```{r}
-
+# a mix of different types of OJS pages, including a few illformed
 url_sample <- c( 'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903',
           'http://fundacionmenteclara.org.ar/revista/index.php/RCA/issue/view/2018-Vol3-2',
           'http://fundacionmenteclara.org.ar/revista/index.php/RCA/article/download/43/54',
@@ -105,50 +108,57 @@ url_sample <- c( 'https://publicaciones.sociales.uba.ar/index.php/psicologiasoci
 
 We'll parse them, and store the result in a dataframes (`what_type_of_urls`)
 
-```{r message=FALSE}
-
-library(tidyverse) # we'll use dplyr and tidy several times in the vignette
-library(ojsr) 
+```{r}
 what_type_of_urls <- ojsr::process_urls(url_sample)
 glimpse(what_type_of_urls)
-
 ```
 
 The resulting dataframe contains the following:
 
-1. *url* - the url provided
+1. *url* - the url you provided
 2. *page* - the page class the url is pointing at (article, issue, oai, search, etc.)
 3. *command* - the name of the function within the page (view, download, search, etc.)
-4. *expect* - what you could do at this page; usually a combination of command + page or a variant (view article, download galley)
-5. 
+4. *expect* - what you could do at this page; usually a combination of command + page or a variant: 
+    i) *view article*: shows the abstract page, with references and links to galleys (full-content, supplementary materials) (i.e.,  <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047>)
+    ii) *view galley*: shows an inline reader of a galley (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/6/2803>)
+    iii) *download galley*: forces a galley download (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/download/1047/1050>)
+    iv) *current issue coverpage*: redirects the current issue coverpage; may or may not include ToC and links to articles (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current>)
+    v) *view issue coverpage*: shows an issue coverpage; may or may not include ToC and links to articles (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/526>)
+    vi) *view issue ToC*: shows the ToC of an issue (with link to articles and galleys) (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/526/showToC>)
+    vii) *view issue archive*: shows the list of issues (i.e, <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/archive>)
+    viii) *oai*: shows the OAI protocol base URL (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/oai>)
+    ix) *search*: shows search form / result (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/search/search?query=big+data>)
+5. *issueId* - if an issue, its ID; otherwise ""
+6. *articleId* - if an article, its ID; otherwise ""
+7. *galleyId* - if a galley (full-content, supplementary materials, etc.), its ID; otherwise ""
+8. *assume_article* - the *(assumed to be) right* url to scrap metadata from an article (if articleID is present, otherwise "")
+9. *assume_issue* - the *(assumed to be) right* url to scrap the ToC from an issue (if issueID is present, otherwise "")
+10. *assume_oai* - the *(assumed to be) right* url to the OAI records listing
+11. *assume_search* - the *(assumed to be) right* url to a search result (you may contact to a query)
+12. *assume_archive* - the *(assumed to be) right* url to scrap the list of issues
+13. *baseUrl* - base url of the OJS, for you to do your own processing.
 
-- *article_abstract* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047>) pointing at a page with the title of the article, the abstract, and the links to "galleys" (full-content text) and supplementary materials
-- *download_galley* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047/1050>) pointing at full-content in pdf, html, epub, etc. This may or may not force download
-- *issue* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/issue/view/91>) pointing at a full issue of a journal
-- *oai* urls (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/oai>) pointing at the entry page of the oai protocol
 
+## get_issue_urls_from_archive: Retrieve issues urls from the archive of issues
 
-## get_issue_urls_from_archive: Retrieve issues urls from issue/archive pages
+Let's say you want to crawl a few journals in order to list their issues, so you can latter iterate through them and scrap articles' meta-data. We can use `get_issue_urls_from_archive()` for that. 
 
-Let's say you want to crawl a few journals in order to list their issues, so you can latter iterate through them and scrap their articles' meta-data. We can use `get_issue_urls_from_archive()` for that. 
-
-`get_issue_urls_from_archive()` requires a list OJS urls pointing at the archive of issues of each journal (e.g., <https://papiro.unizar.es/ojs/index.php/rc51-jos/issue/archive>). 
-
-However, if you provide the url of any pages of the OJS, `get_issue_urls_from_archive()` can take the *assumed-to-be-right* url, by calling to `process_urls()` internally. In the following example, we are providing a short list of OJS urls, mixing both the archive of issues and home pages.
+`get_issue_urls_from_archive()` requires a list OJS urls pointing at the archive of issues of each journal (e.g., <https://papiro.unizar.es/ojs/index.php/rc51-jos/issue/archive>). If you are unsure about your url list, you can first pre-process it with `process_urls()` and use the  *assumed-to-be-right* url instead.
 
 ```{r}
-
-# let's start by providing a mix
-
-socPsy_urls <- c( # a few argentinian social psychology journals 
+# let's start by providing a mix url list of argentinian social psychology journals 
+socPsy_urls <- c( 
   'http://sportsem.uv.es/j_sports_and_em/index.php/rips/', # home page of journal, including ToC of current issue
-  'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive', # archive of issues
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/526' # a particular issue's cover page (no ToC)
+  'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive', # points at the archive of issues
+  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903' # points at an article 
 )
 
-# let's use get_issue_urls_from_archive to retrieve the issues url from the archive of issue page of these OJS
-# we'll allow get_issue_urls_from_archive to use the assummed url 
+# we'll use process_urls to retrieve the assumed url for archive of issues (what_type_of_urls$assume_archive)
+what_type_of_urls <- ojsr::process_urls(socPsy_urls)
 
+# we'll use get_issue_urls_from_archive to retrieve the issues' link from the archives
+issues <- get_issue_urls_from_archive(what_type_of_urls$assume_archive )
 
-
+# result is in a dataframe
+glimpse(issues)
 ```
