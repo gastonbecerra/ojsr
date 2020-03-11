@@ -91,7 +91,7 @@ process_urls <- function( url ) {
     }
 
     ojs_url$assume_article <- ifelse(ojs_url$articleId != "", paste0(ojs_url_baseUrl , "/article/view/", ojs_url$articleId), "")
-    ojs_url$assume_issue <- ifelse(ojs_url$issueId != "", paste0(ojs_url_baseUrl , "/issue/", ojs_url$issueId , "/showToc"), "")
+    ojs_url$assume_issue <- ifelse(ojs_url$issueId != "", paste0(ojs_url_baseUrl , "/issue/view/", ojs_url$issueId , "/showToc"), "")
     ojs_url$assume_oai <- paste0(ojs_url_baseUrl , "/oai")
     ojs_url$assume_search <- paste0(ojs_url_baseUrl , "/search/search/query=")
     ojs_url$assume_archive <- paste0(ojs_url_baseUrl , "/issue/archive")

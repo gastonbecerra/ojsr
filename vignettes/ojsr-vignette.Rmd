@@ -20,33 +20,18 @@ library(knitr)
 ```
 
 
-
 # Overview
 
+The aim of this package is to aid you in several OJS tasks, such as: 
 
-
-The aim of this package is to aid retrieve/scraping meta-data and/or accessing galleys (full-text and supplementary files) from OJS url(s).
-
-This package currently provides:
-
-- 1 function (**process_urls**) to parse OJS ulrs, according to OJS routing conventions, to identify what type of page are they pointing at, and to write the expected url for each scrapping task;
-- 1 function (**get_metadata_from_page**) to collect meta-data from OJS articles page (via html scraping)
-- 1 function (**get_galley_urls**) to retrieve meta-data from OJS article OAI record
-
-It is intended that this package will include:
-
-- 1 function to crawl archive
-- 1 function to crawl issue(s)
-- 1 function to crawl search results
-- some auxiliary functions (to identify OJS version (via generator metatag), to store/download full-text files, etc.)
-- 1 dataset of handy codes for scraping
-
+- parse OJS urls, according to routing conventions;
+- crawling archives, issues, articles, galleys;
+- retrieving/scraping meta-data from articles;
 
 ## Important! 
 
-- Most of ojsr functions **rely on OJS conventions and default themes**, and therefore are most likely to fail when used on customized OJS installments (i.e., customized themes, routing improvements via .htaccess), and also on non-compliant OJS configuration and record keeping (i.e., when metadata has not been well-broomed by the Editor/Publisher, or OAI records do not follow standards). 
+- Most of ojsr functions rely on **OJS conventions and default themes**, and therefore are most likely to fail when used on customized OJS installments (i.e., customized themes, routing improvements via .htaccess), and also on non-compliant OJS configuration or poor record keeping (i.e., when metadata has not been well-broomed by the Editor/Publisher, or OAI records do not follow standards). 
 - Also, please notice that only **common OJS v1 and v2 conventions** are considered (see "OJS v3 and OJS API" below).
-
 
 
 ## About OJS
@@ -58,7 +43,6 @@ Open Journal Systems (OJS) is a journal management and publishing system that ha
 OJS assists with every stage of the refereed publishing process, from submissions through to online publication and indexing. Through its management systems, its finely grained indexing of research, and the context it provides for research, OJS seeks to improve both the scholarly and public quality of refereed research.
 
 OJS is open source software made freely available to journals worldwide for the purpose of making open access publishing a viable option for more journals, as open access can increase a journal’s readership as well as its contribution to the public good on a global scale (see PKP Publications).
-
 
 
 ## OJS v3 and OJS API
@@ -84,7 +68,7 @@ Let's say you have a bunch of OJS specific article urls you'd like to scrap thei
 Please keep in mind that `process_urls()` works with **routing conventions** (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>). The list of urls you input is not actually browsed.
 
 
-```{r}
+```{r message=FALSE, warning=FALSE}
 # let's start by loading the libraries
 library(ojsr) 
 library(tidyverse) # we'll use dplyr and tidy several times in the examples
@@ -110,10 +94,9 @@ We'll parse them, and store the result in a dataframes (`what_type_of_urls`)
 
 ```{r}
 what_type_of_urls <- ojsr::process_urls(url_sample)
-glimpse(what_type_of_urls)
 ```
 
-The resulting dataframe contains the following:
+The resulting dataframe contains the following columns:
 
 1. *url* - the url you provided
 2. *page* - the page class the url is pointing at (article, issue, oai, search, etc.)
@@ -139,11 +122,12 @@ The resulting dataframe contains the following:
 13. *baseUrl* - base url of the OJS, for you to do your own processing.
 
 
+
 ## get_issue_urls_from_archive: Retrieve issues urls from the archive of issues
 
 Let's say you want to crawl a few journals in order to list their issues, so you can latter iterate through them and scrap articles' meta-data. We can use `get_issue_urls_from_archive()` for that. 
 
-`get_issue_urls_from_archive()` requires a list OJS urls pointing at the archive of issues of each journal (e.g., <https://papiro.unizar.es/ojs/index.php/rc51-jos/issue/archive>). If you are unsure about your url list, you can first pre-process it with `process_urls()` and use the  *assumed-to-be-right* url instead.
+`get_issue_urls_from_archive()` requires a list OJS urls pointing at the archive of issues of each journal (e.g., <https://papiro.unizar.es/ojs/index.php/rc51-jos/issue/archive>). If you are unsure about your url list, you can first pre-process it with `process_urls()` and use the  *assumed-to-be-right* url instead (**$assume_archive**).
 
 ```{r}
 # let's start by providing a mix url list of argentinian social psychology journals 
@@ -153,12 +137,102 @@ socPsy_urls <- c(
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903' # points at an article 
 )
 
-# we'll use process_urls to retrieve the assumed url for archive of issues (what_type_of_urls$assume_archive)
+# we'll use process_urls to retrieve the assumed url for archive of issues (what_type_of_urls$assume_archive);
+# we'll pass that as the url list to scrap 
 what_type_of_urls <- ojsr::process_urls(socPsy_urls)
+issues <- ojsr::get_issue_urls_from_archive(what_type_of_urls$assume_archive)
 
-# we'll use get_issue_urls_from_archive to retrieve the issues' link from the archives
-issues <- get_issue_urls_from_archive(what_type_of_urls$assume_archive )
-
-# result is in a dataframe
+# result is in a long-format dataframe, containing the provided url in "url" (col1), and the issues url in "links" (col2)
 glimpse(issues)
 ```
+
+### Available methods
+- **scrap_by_href_convention** (default): checks the urls in the links for the expected convention "/issue/view"
+
+
+
+## get_article_urls_from_issue: Retrieve articles urls from issue pages
+
+Let's say you want to crawl particular issues in order to list their articles, so you can latter iterate through them and scrap their meta-data. We can use `get_article_urls_from_issue()` for that. 
+
+`get_article_urls_from_issue()` requires a list OJS urls pointing at the issues of each journal (e.g., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/319/showToc>). Issues in OJS may or may not show a cover page, and show or not show the table of contents (this is where the links to the article reside). Usually, you can force the display of the ToC by adding "/ShowToC" to the url. You could pre-process your url list with `process_urls()` and use the  *assumed-to-be-right* url instead (**$assume_issue**).
+
+```{r}
+# let's start by providing the initial issues from a few argentinian social psychology journals 
+socPsy_issues_url <- c( 
+  'http://sportsem.uv.es/j_sports_and_em/index.php/rips/issue/view/5', # includes ToC
+  'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/view/Psicodebate%201', # includes ToC
+  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31' # does not include ToC
+)
+
+# we'll use process_urls to retrieve the assumed url for issues including the ToC (what_type_of_urls$assume_issue);
+# we'll pass that as the url list to scrap 
+what_type_of_urls <- ojsr::process_urls(socPsy_issues_url)
+articles <- ojsr::get_article_urls_from_issue(what_type_of_urls$assume_issue)
+
+# result is in a long-format dataframe, containing the provided url in "url" (col1), and the articles url in "links" (col2)
+glimpse(articles)
+```
+
+### Available methods
+
+- **scrap_by_href_convention_no_classes** (default): checks the urls in the links for the expected convention "/article/view" and then filters only those with no "pdf" or "file" classes (usually pointing to a galley, such as, full-content, secondary reading formats, and/or supplementary files)
+- **scrap_by_href_convention**: checks the urls in the links for the expected convention "/article/view"; if the issue points both to the articles and their galleys, these may result in more than one link to an article.
+
+
+## get_galley_urls_from_article: Retrieve articles urls from article pages
+
+If you have a list of articles urls, you may retrieve the galley links (full-content pdfs and other reading formats, and also any supplementary files) via  `get_galley_urls_from_article()`.
+
+Galleys are usually linked from other type of pages too, other than articles, like some issues ToC, or other galleys inline readers. However, the safest place to search for them is the "view article" page. You could pre-process your url list with `process_urls()` and use the  *assumed-to-be-right* url instead (**$assume_article**).
+
+```{r}
+# let's say we want to get the galleys from the articles of a complete issue
+# we should start by crawling the issue, then crawling the resulting articles
+# we'll use process_urls only in the first (crawling issue) and pass directly the articles urls to get the galleys
+issue <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/view/41'
+what_type_of_url <- ojsr::process_urls(issue)
+articles <- ojsr::get_article_urls_from_issue(what_type_of_url$assume_issue)
+galleys <- ojsr::get_galley_urls_from_article(articles$links)
+# result is in a long-format dataframe, containing the provided url in "url" (col1), and the galley link in "links" (col2),
+# the galley format in "format" (col3) and the url to force download in "force" (col4)
+# you may filter some of these, and then pass this vector to a download function
+# i.e., using dplyr's filter on format, and download.file:
+# url_download <- galleys %>% filter(format=="pdf") %>% select(force) %>% unlist(use.names = FALSE)
+# for (i in 1:length(url_download)){ 
+#    download.file( url_download[i], mode = 'wb' , destfile = paste0(getwd(),"/",i,".pdf")) 
+# }
+```
+
+### Available methods
+
+- **scrap_by_class_convention** (default): checks the classes in the links and retrieves where "file" or "obj_galley_link" are found.
+
+## get_metadata_from_article: Retrieve metadata from article pages
+
+If you have a list of articles urls, you may retrieve the galley links (full-content pdfs and other reading formats, and also any supplementary files) via  `get_galley_urls_from_article()`.
+
+Galleys are usually linked from other type of pages too, other than articles, like some issues ToC, or other galleys inline readers. However, the safest place to search for them is the "view article" page. You could pre-process your url list with `process_urls()` and use the  *assumed-to-be-right* url instead (**$assume_article**).
+
+```{r}
+# let's say we want to get the meta data from the articles of a complete issue
+# we should start by crawling the issue, then scraping the resulting articles
+# we'll use process_urls() only in the first (crawling issue) and pass directly the articles' urls to the metadata scraper
+issue <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/view/41'
+what_type_of_url <- ojsr::process_urls(issue)
+articles <- ojsr::get_article_urls_from_issue(what_type_of_url$assume_issue)
+metadata <- ojsr::get_metadata_from_article(articles$links, verbose = TRUE)
+# result is in a long-format dataframe, containing the provided url in "url" (col1), xxx,
+
+# # you may xxx
+# # i.e., using dplyr's filter on format, and download.file
+# url_download <- galleys %>% filter(format=="pdf") %>% select(force) %>% unlist(use.names = FALSE)
+# for (i in 1:length(url_download)){ 
+#    download.file( url_download[i], mode = 'wb' , destfile = paste0(getwd(),"/",i,".pdf")) 
+# }
+```
+
+### Available methods
+
+- **scrap_by_class_convention** (default): checks the classes in the links and retrieves where "file" or "obj_galley_link" are found.
+
