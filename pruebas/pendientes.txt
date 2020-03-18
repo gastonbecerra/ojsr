@@ -1,0 +1,37 @@
+pendientes
+----------
+
+que pasa cuando mando un url vacio?
+
+
+errores ... tengo que sacar los warnings de adentro de los trycatch
+
+
+scrapear una busqueda
+# 2do: search form or result?
+# https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/search/search?simpleQuery=becerra&searchField=query
+
+
+
+
+
+
+
+
+
+
+
+descartes??
+---------
+
+3. *command* - the name of the function (view, download, search, etc.)
+4. *expect* - what you could do at this page; usually a combination of command + page or a variant:
+    i) *view article*: shows the abstract page, with references and links to galleys (full-content, supplementary materials) (i.e.,  <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/view/1047>)
+    ii) *view galley*: shows an inline reader of a galley (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/6/2803>)
+    iii) *download galley*: forces a galley download (i.e., <https://papiro.unizar.es/ojs/index.php/rc51-jos/article/download/1047/1050>)
+    iv) *current issue coverpage*: redirects the current issue coverpage; may or may not include ToC and links to articles (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current>)
+    v) *view issue coverpage*: shows an issue coverpage; may or may not include ToC and links to articles (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/526>)
+    vi) *view issue ToC*: shows the ToC of an issue (with link to articles and galleys) (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/526/showToC>)
+    vii) *view issue archive*: shows the list of issues (i.e, <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/archive>)
+    viii) *oai*: shows the OAI protocol base URL (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/oai>)
+    ix) *search*: shows search form / result (i.e., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/search/search?query=big+data>)

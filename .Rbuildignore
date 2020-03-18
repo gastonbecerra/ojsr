@@ -1,4 +1,5 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
 ^tutorial4pack$
-^R	utorial4pack\.R$
+^tutorial4pack\.R$
+^pruebas$
