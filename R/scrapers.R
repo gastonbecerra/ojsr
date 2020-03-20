@@ -151,33 +151,33 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from) 
           switch ( from ,
             "get_issue_urls_from_archive" = {
               xpath <- '//a[contains(@href, "/issue/view/")]'
-              output_names <- c('archive','issue')
+              output_names <- c('archive', 'baseUrl', 'issue')
             },
             "get_article_urls_from_issue" = {
               xpath <- switch (method,
                 "scrap_by_href_convention" = '//a[contains(@href, "/article/view/")',
                 "scrap_by_href_convention_no_classes" = '//a[contains(@href, "/article/view/") and not(contains(@class, "file")) and not(contains(@class, "pdf"))]'
               )
-              output_names <- c('issue','article')
+              output_names <- c('issue', 'baseUrl', 'article')
             }
           )
           links <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href") %>% unique()
           if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(links), " elements using criteria ", xpath) }
           if (length(links)>0) {
-            df <- rbind(df, data.frame(cbind( url_input[i] , links ), stringsAsFactors = FALSE))
+            df <- rbind(df, data.frame(cbind( url_input[i], if_else(use_conventional_url, url_parsed$baseUrl[i], ""), links ), stringsAsFactors = FALSE))
           }
 
         } else if ( from_method == "get_galley_urls_from_article@scrap_by_class_convention" ) {
 
           xpath <- './/a[contains(@class, "file") or contains(@class, "obj_galley_link") or contains(@class, "download")]'
-          output_names <- c('article','galley','format','force')
+          output_names <- c('article','baseUrl','galley','format','force')
           links <- rvest::html_nodes(webpage, xpath = xpath)
           if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(links), " elements using criteria ", xpath) }
           if (length(links)>0) {
             links_url <- links %>% xml2::xml_attr("href") %>% unique()
             links_formats <- links %>% rvest::html_text() %>% trimws()
             links_force <- gsub(pattern = "article/view", replacement = "article/download", x = links_url, fixed = TRUE)
-            df <- rbind(df, data.frame(cbind( url_input[i] , links_url, links_formats , links_force ), stringsAsFactors = FALSE))
+            df <- rbind(df, data.frame(cbind( url_input[i] , if_else(use_conventional_url, url_parsed$baseUrl[i], ""), links_url, links_formats , links_force ), stringsAsFactors = FALSE))
           }
 
         } else if ( from_method == "get_metadata_from_article@scrap_meta_in_head" ) {
@@ -197,7 +197,11 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from) 
               }
             }
             if (!( purrr::is_empty(meta_data_name) | purrr::is_empty(meta_data_content) )) {
-              df <- rbind(df, as.data.frame(cbind(article = url_input[i],meta_data_name,meta_data_content,meta_data_scheme,meta_data_xmllang), stringsAsFactors = FALSE))
+              df <- rbind(df,
+                as.data.frame(cbind(
+                  article = url_input[i],
+                  baseUrl = if_else(use_conventional_url, url_parsed$baseUrl[i], ""),
+                  meta_data_name,meta_data_content,meta_data_scheme,meta_data_xmllang), stringsAsFactors = FALSE))
             }
           }
 
@@ -294,7 +298,12 @@ get_oai_metadata_from_article <- function ( url , verbose = FALSE ) {
       if ( ! "error" %in% names(record[[1]]) ) {
         tryCatch({
           registro <- record[[1]]$GetRecord$record$metadata$dc %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE, row.names = FALSE)
-          registro_tidy <- registro %>% cbind(url = url[i], deparse.level = TRUE) %>% gather( key=meta_data_name , value=meta_data_content, -url)
+          registro_tidy <- registro %>%
+            cbind( url = url[i] ) %>%
+            # ,conventional_article = process_url$conventional_article[1], deparse.level = TRUE
+            cbind( baseUrl = process_url$baseUrl[1] ) %>%
+            gather( key=meta_data_name , value=meta_data_content, -c(url, baseUrl))
+
           registro_tidy$meta_data_name <- sub('\\..*', '', registro_tidy$meta_data_name)
         }, warning = function(war) { warning(paste("warning processing ", url[i])) ;
         }, error = function(err) { warning(paste("error processing ", url[i]));

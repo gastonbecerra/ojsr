@@ -69,7 +69,7 @@ Let's say you have a bunch of OJS specific article urls you'd like to scrap thei
 
 `process_urls()` allows you to **parse a list of urls against OJS routing conventions** to extract the parameters invoked (e.g., article, issues, galley IDs) and generate the *conventional* url for specific purposes, such as scraping meta-data, or scraping the list of issues for the archive of issues page.
 
-`process_urls()` is invoked from the `get_*_url_from_*` functions before scraping when `use_contentional_url = TRUE` (or default).
+`process_urls()` is invoked from the `get_*_url_from_*` functions before scraping when `use_contentional_url = TRUE` (or default). When a *conventional* url is used for scraping, this is also returned in the resulting dataframe, so you could easily join tables (from scraping articles, issues, archives, etc.) , by creating a table of conventional urls with `process_urls()`.
 
 `process_urls()` works with **routing conventions** (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>). The list of urls you input is not actually browsed!
 
@@ -92,7 +92,7 @@ what_type_of_urls <- ojsr::process_urls(url_sample)
 The resulting dataframe contains the following columns:
 
 1. *url* - the url you provided
-2. *baseUrl* - base url of the OJS
+2. *baseUrl* - base url of the OJS (you may use this to join and relate tables generated with `get_*_url_from_*` functions)
 3. *issueId* - if an issue, its ID (string); otherwise NA
 4. *articleId* - if an article, its ID (string); otherwise NA
 5. *galleyId* - if a galley (full-content, supplementary materials, etc.), its ID (string); otherwise NA
@@ -123,7 +123,8 @@ issues <- ojsr::get_issue_urls_from_archive(url = socPsy_urls, use_conventional_
 Result is in a long-format dataframe, containing:
 
 1. *archive* - the url you provided
-2. *issue* - the issues url
+2. *baseUrl* - if use_conventional_url = TRUE, the baseUrl from ojs::process_url; otherwise, ""
+3. *issue* - the issues url
 
 
 
@@ -150,7 +151,8 @@ articles <- ojsr::get_article_urls_from_issue(socPsy_issues_url, use_conventiona
 Result is in a long-format dataframe, containing:
 
 1. *issue* - the url you provided
-2. *articles* - the articles url
+2. *baseUrl* - if use_conventional_url = TRUE, the baseUrl from ojs::process_url; otherwise, ""
+3. *articles* - the articles url
 
 
 
@@ -177,9 +179,10 @@ galleys <- ojsr::get_galley_urls_from_article(socPsy_articles, use_conventional_
 Result is in a long-format dataframe, containing:
 
 1. *article* - the url you provided
-2. *galley* - the galley url linked
-3. *format* - the format of the galley (e.g., pdf, xml)
-4. *force* - the conventional url to force download of the galley
+2. *baseUrl* - if use_conventional_url = TRUE, the baseUrl from ojs::process_url; otherwise, ""
+3. *galley* - the galley url linked
+4. *format* - the format of the galley (e.g., pdf, xml)
+5. *force* - the conventional url to force download of the galley
 
 You may filter some of these, and then pass the "force" column to a download function of your own (e.g., <https://stackoverflow.com/questions/39246739/download-multiple-files-using-download-file-function>).
 
@@ -202,14 +205,14 @@ socPsy_articles <- c( # 3 articles on social psychology, specifically social rep
 )
 metadata <- ojsr::get_metadata_from_article(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE) 
 ```
-
 Result is in a long-format dataframe, containing:
 
 1. *article* - the url you provided
-2. *meta_data_name* - name of the property/metadata (e.g., "DC.Date.created" for the Date of creation) 
-3. *meta_data_content* - the actual value of the metatag
-4. *meta_data_scheme* - the standard in which the content is annotated
-5. *meta_data_xmllang* - the language in which the metadata was entered
+2. *baseUrl* - if use_conventional_url = TRUE, the baseUrl from ojs::process_url; otherwise, ""
+3. *meta_data_name* - name of the property/metadata (e.g., "DC.Date.created" for the Date of creation) 
+4. *meta_data_content* - the actual value of the metatag
+5. *meta_data_scheme* - the standard in which the content is annotated
+6. *meta_data_xmllang* - the language in which the metadata was entered
 
 You may analize this dataframe to explore bibliometric properties of a collection of articles.
 
@@ -225,10 +228,6 @@ An alternative to webscraping metadata from the html of article pages is to retr
 **Note:** If you are interested in working with OAI records, you may want to check Scott Chamberlain's **OAI package for R** <https://CRAN.R-project.org/package=oai>. If you only have the OJS home url, and would like to check all the article's OAI records at one shot, an interesting option is to parse it with `ojsr::process_urls()` and passing the OAI url ($conventional_oai) to `oai::list_identifiers()`.
 
 ```{r}
-url_sample <- c(
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903',
-  'http://fundacionmenteclara.org.ar/revista/index.php/RCA/article/download/43/54'
-)
 socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
   'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657', # url pointing to the article page
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing to the article page
@@ -240,5 +239,6 @@ metadata_oai <- ojsr::get_oai_metadata_from_article(url = socPsy_articles, verbo
 Result is in a long-format dataframe, containing:
 
 1. *url* - the url you provided
-2. *meta_data_name* - name of the property/metadata (e.g., "DC.Date.created" for the Date of creation) 
-3. *meta_data_content* - the actual value of the metatag
+2. *baseUrl* - if use_conventional_url = TRUE, the baseUrl from ojs::process_url; otherwise, ""
+3. *meta_data_name* - name of the property/metadata (e.g., "DC.Date.created" for the Date of creation) 
+4. *meta_data_content* - the actual value of the metatag

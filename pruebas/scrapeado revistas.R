@@ -26,39 +26,61 @@ nombre <- c(
 revistas <- as.data.frame(cbind(url=url,nombre=nombre),stringsAsFactors = FALSE)
 rm(url,nombre)
 
-
 ## recuperacion de datos con ojsr ------------------
 
+ps_revistas <- revistas %>% left_join( ojsr::process_urls( revistas$url ))
 ps_numeros <- ojsr::get_issue_urls_from_archive(url = revistas$url, verbose = TRUE) # listamos los issues o numeros de las revistas
-ps_numeros %>% inner_join(revistas, by=c("archive"="url")) %>% group_by(nombre) %>% tally() # cantidad de numeros por revista
-
 ps_articulos <- ojsr::get_article_urls_from_issue(ps_numeros$issue, verbose = TRUE) # a partir de los issues, listamos los articulos
-ps_articulos %>% inner_join(ps_numeros, by="issue") %>% inner_join(revistas, by=c("archive"="url")) %>% group_by(nombre) %>% tally() # cantidad de articulos por revista
-
 ps_metadata <- ojsr::get_metadata_from_article(ps_articulos$article, verbose = TRUE) # buscamos la metada por articulo
 
-ps <- list(revistas=revistas, numeros=ps_numeros, articulos=ps_articulos, metadata=ps_metadata) # por comodidad, guardamos todo en un objeto
+ps <- list(revistas=ps_revistas, numeros=ps_numeros, articulos=ps_articulos, metadata=ps_metadata) # por comodidad, guardamos todo en un objeto
 saveRDS(ps,file=paste0("ps_",format(Sys.time(), "%y%m%d_%H%M"),".rds")) # guardamos en disco, para evitar este paso de ahora en mas
-rm(ps_articulos,ps_metadata,ps_numeros)
+rm(ps_articulos,ps_metadata,ps_numeros,ps_revistas,revistas)
 
 
 ## ... o arrancamos con todo procesado ------------------
 
 
-ps <- readRDS("C:/Users/GASTON/Desktop/r/ojsr/pruebas/ps_200319_1055.rds")
+# ps <- readRDS("C:/Users/GASTON/Desktop/r/ojsr/pruebas/ps_200320_0218.rds")
 
 
 ## descriptivos de la muestra ------------------
 
-
-glimpse(ps$revistas)
-
 nrow(ps$revistas) # cantidad de revistas
-ps$numeros %>% inner_join(ps$revistas, by=c("url"="assume_archive")) %>% group_by(nombre) %>% tally() # cantidad de numeros por revista
-ps$articulos %>% inner_join(ps$numeros, by=c("url"="links")) %>% inner_join(ps$revistas, by=c("url.y"="assume_archive")) %>% group_by(nombre) %>% tally() # cantidad de articulos por revista
+muestra <-
+  left_join(
+    ps$numeros %>% left_join(ps$revistas) %>% group_by(nombre) %>% summarize(numeros=n()), # cantidad de numeros por revista
+    ps$articulos %>% left_join(ps$revistas) %>% group_by(nombre) %>% summarize(articulos=n()) # cantidad de articulos por revista
+    ) %>%
+  left_join(
+    ps$metadata %>% left_join(ps$revistas) %>% group_by(nombre) %>% summarize(metadata=n()) # cantidad de metadata por revista
+  )
+muestra$metada_articulo <- muestra$metadata / muestra$articulos
+muestra
+
+# desvalimiento tiene solo 3 metadata x art... no los esta sirviendo
+
+# vamos a ver si podemos tomarlos por oai
+glimpse(ps$revistas)
+ps$revistas %>% filter(nombre=="Desvalimiento psicosocial") %>% select(baseUrl) %>% unlist()
+articulosDPS <- ps$articulos %>% filter(baseUrl ==  (ps$revistas %>% filter(nombre=="Desvalimiento psicosocial") %>% select(baseUrl) %>% unlist()))
+oai_articulosDPS <- ojsr::get_oai_metadata_from_article(articulosDPS$article, verbose = TRUE)
+oai_articulosDPS2 <- distinct(oai_articulosDPS)
 
 
-ojsr::get_article_urls_from_issue( url = ps$numeros %>% filter(url=='https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/archive') %>% select(links) %>% unlist() , verbose = TRUE)
+
+
+
+
+
+# 2do: get_oai_metadata_from_article tiene que traer el idioma con el que se sirve el contenido
+
+
+
+
+
+
+
 
 
 view(ps$articulos)
