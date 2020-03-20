@@ -1,11 +1,12 @@
-#' Scraps OJS article pages for galleys urls
+#' Scraps an OJS archive page for issues urls
 #'
 #' This functions xxx
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
 #' @param url Character vector.
-#' @param method String. Available methods: scrap_by_class_convention
+#' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
+#' @param method String. Available methods: scrap_by_href_convention
 #' @param verbose Logical.
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
 #' @examples
@@ -13,32 +14,14 @@
 #'     xxx
 #'
 #' @export
-#'
-get_metadata_from_article <- function ( url , method = "scrap_meta_in_head", verbose = FALSE ) {
-  df <- ojrs_scrap(url = url, verbose = verbose, method = method, from = "get_metadata_from_article")
+get_issue_urls_from_archive <- function ( url , use_conventional_url = TRUE, verbose = FALSE, method = "scrap_by_href_convention" ) {
+  df <- ojrs_scrap(url_input = url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_issue_urls_from_archive")
   return(df)
 }
 
-#' Scraps OJS article pages for galleys urls
-#'
-#' This functions xxx
-#'
-#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
-#'
-#' @param url Character vector.
-#' @param method String. Available methods: scrap_by_class_convention
-#' @param verbose Logical.
-#' @return A dataframe with the urls of the articles linked from the OJS issue page.
-#' @examples
-#'
-#'     xxx
-#'
-#' @export
-#'
-get_galley_urls_from_article <- function ( url , method = "scrap_by_class_convention", verbose = FALSE ) {
-  df <- ojrs_scrap(url = url, verbose = verbose, method = method, from = "get_galley_urls_from_article")
-  return(df)
-}
+
+
+
 
 #' Scraps an OJS issue page for articles urls
 #'
@@ -47,6 +30,7 @@ get_galley_urls_from_article <- function ( url , method = "scrap_by_class_conven
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
 #' @param url Character vector.
+#' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
 #' @param method String. Available methods: scrap_by_href_convention_no_classes, scrap_by_href_convention_no
 #' @param verbose Logical.
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
@@ -56,19 +40,23 @@ get_galley_urls_from_article <- function ( url , method = "scrap_by_class_conven
 #'
 #' @export
 #'
-get_article_urls_from_issue <- function ( url , method = "scrap_by_href_convention_no_classes", verbose = FALSE ) {
-  df <- ojrs_scrap(url = url, verbose = verbose, method = method, from = "get_article_urls_from_issue")
+get_article_urls_from_issue <- function ( url , use_conventional_url = TRUE, verbose = FALSE, method = "scrap_by_href_convention_no_classes" ) {
+  df <- ojrs_scrap(url_input = url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_article_urls_from_issue")
   return(df)
 }
 
-#' Scraps an OJS archive page for issues urls
+
+
+
+#' Scraps OJS article pages for galleys urls
 #'
 #' This functions xxx
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
 #' @param url Character vector.
-#' @param method String. Available methods: scrap_by_href_convention
+#' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
+#' @param method String. Available methods: scrap_by_class_convention
 #' @param verbose Logical.
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
 #' @examples
@@ -76,54 +64,120 @@ get_article_urls_from_issue <- function ( url , method = "scrap_by_href_conventi
 #'     xxx
 #'
 #' @export
-get_issue_urls_from_archive <- function ( url , method = "scrap_by_href_convention", verbose = FALSE ) {
-  df <- ojrs_scrap(url = url, verbose = verbose, method = method, from = "get_issue_urls_from_archive")
+#'
+get_galley_urls_from_article <- function ( url , use_conventional_url = TRUE, verbose = FALSE, method =  "scrap_by_class_convention" ) {
+  df <- ojrs_scrap(url_input = url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_galley_urls_from_article")
   return(df)
 }
 
 
-ojrs_scrap <- function (url , verbose , method, from) {
 
-  if ( !is.character(url) ) { stop("url must be a character string/vector", call. = FALSE) }
+
+#' xxx
+#'
+#' This functions xxx
+#'
+#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+#'
+#' @param url Character vector.
+#' @param method String. Available methods: scrap_by_class_convention
+#' @param verbose Logical.
+#' @return A dataframe with the urls of the articles linked from the OJS issue page.
+#' @examples
+#'
+#'     xxx
+#'
+#' @export
+#'
+get_metadata_from_article <- function ( url , use_conventional_url = TRUE, verbose = FALSE, method =  "scrap_meta_in_head") {
+  df <- ojrs_scrap(url_input = url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_metadata_from_article")
+  return(df)
+}
+
+
+
+
+ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from) {
+
+  if ( !is.character(url_input) ) { stop("url must be a character string/vector", call. = FALSE) }
   if ( !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
   if ( !is.character(method) ) { stop("method must be a character string", call. = FALSE) }
-
-  from_method <- paste(from, method, sep = "@")
+  if ( !is.logical(use_conventional_url) ) { stop("use_conventional_url must be logical", call. = FALSE) }
 
   df <- data.frame() # object to collect
+
+  if ( use_conventional_url ) { # should we parse urls, and use the conventional url?
+    if (verbose) { message("parsing urls") }
+    tryCatch({
+      url_parsed <- ojsr::process_urls(url_input)
+      url <- switch (from,
+        get_issue_urls_from_archive = url_parsed$conventional_archive,
+        get_article_urls_from_issue = url_parsed$conventional_issue,
+        get_galley_urls_from_article = url_parsed$conventional_article,
+        get_metadata_from_article = url_parsed$conventional_article
+      )
+      if (verbose) { message("urls parsed; using conventional format for urls instead of input") }
+      }, warning = function(war) { warning(paste("warning parsing input urls: ",war)) ;
+      }, error = function(err) { warning(paste("error parsing input urls: ",err));
+      })
+  } else {
+    if (verbose) { message("using input urls; if you get 0-1 results per journal, try use_conventional_url=TRUE") }
+    url <- url_input
+  }
 
   for (i in 1:length(url)) { # loop for vectorized url input
 
     if (verbose) { message("trying url ", i, "/" , length(url), " ", url[i]) }
 
-      tryCatch({
+    if (url[i] == "") {
 
+      # 2do: puede ser que la convencion haya dado ""...
+
+    } else {
+
+      webpage_read = FALSE;
+      tryCatch({ # reading the webpage
         webpage <- xml2::read_html(url[i]) # url page content
+        webpage_read = TRUE;
+      }, warning = function(war) { warning(paste("warning reading ", url[i], " : ",war)) ;
+      }, error = function(err) { warning(paste("error reading ", url[i], " : ",err));
+      })
 
-        if( grepl( x = method, pattern = "scrap_by_href"  )  ) { # crawling
+      from_method <- paste(from, method, sep = "@")
 
-          switch ( from_method ,
-            "get_issue_urls_from_archive@scrap_by_href_convention" = xpath <- '//a[contains(@href, "/issue/view/")]',
-            "get_article_urls_from_issue@scrap_by_href_convention_no_classes" = xpath <- '//a[contains(@href, "/article/view/") and not(contains(@class, "file")) and not(contains(@class, "pdf"))]',
-            "get_article_urls_from_issue@scrap_by_href_convention" = xpath <- '//a[contains(@href, "/article/view/")',
+      if (webpage_read) {
+        if( grepl( x = method, pattern = "scrap_by_href"  )  ) { # we are crawling links
+
+          switch ( from ,
+            "get_issue_urls_from_archive" = {
+              xpath <- '//a[contains(@href, "/issue/view/")]'
+              output_names <- c('archive','issue')
+            },
+            "get_article_urls_from_issue" = {
+              xpath <- switch (method,
+                "scrap_by_href_convention" = '//a[contains(@href, "/article/view/")',
+                "scrap_by_href_convention_no_classes" = '//a[contains(@href, "/article/view/") and not(contains(@class, "file")) and not(contains(@class, "pdf"))]'
+              )
+              output_names <- c('issue','article')
+            }
           )
-
           links <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href") %>% unique()
           if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(links), " elements using criteria ", xpath) }
           if (length(links)>0) {
-            df <- rbind(df, data.frame(cbind( url = url[i] , links = links ), stringsAsFactors = FALSE))
+            df <- rbind(df, data.frame(cbind( url_input[i] , links ), stringsAsFactors = FALSE))
           }
 
         } else if ( from_method == "get_galley_urls_from_article@scrap_by_class_convention" ) {
 
-          xpath <- './/a[contains(@class, "file") or contains(@class, "obj_galley_link")]'
+          xpath <- './/a[contains(@class, "file") or contains(@class, "obj_galley_link") or contains(@class, "download")]'
+          output_names <- c('article','galley','format','force')
           links <- rvest::html_nodes(webpage, xpath = xpath)
           if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(links), " elements using criteria ", xpath) }
           if (length(links)>0) {
             links_url <- links %>% xml2::xml_attr("href") %>% unique()
             links_formats <- links %>% rvest::html_text() %>% trimws()
             links_force <- gsub(pattern = "article/view", replacement = "article/download", x = links_url, fixed = TRUE)
-            df <- rbind(df, data.frame(cbind( url = url[i] , links = links_url, format = links_formats , force = links_force ), stringsAsFactors = FALSE))
+            df <- rbind(df, data.frame(cbind( url_input[i] , links_url, links_formats , links_force ), stringsAsFactors = FALSE))
           }
 
         } else if ( from_method == "get_metadata_from_article@scrap_meta_in_head" ) {
@@ -143,20 +197,19 @@ ojrs_scrap <- function (url , verbose , method, from) {
               }
             }
             if (!( purrr::is_empty(meta_data_name) | purrr::is_empty(meta_data_content) )) {
-              df <- rbind(df, as.data.frame(cbind(url = url[i],meta_data_name,meta_data_content,meta_data_scheme,meta_data_xmllang), stringsAsFactors = FALSE))
+              df <- rbind(df, as.data.frame(cbind(article = url_input[i],meta_data_name,meta_data_content,meta_data_scheme,meta_data_xmllang), stringsAsFactors = FALSE))
             }
           }
 
         } else {
           stop("no valid combination of function / method provided: ", from_method)
         }
+      }
 
-      }, warning = function(war) { warning(paste("warning processing ", url[i], " : ",war)) ;
-      }, error = function(err) { warning(paste("error processing ", url[i], " : ",err));
-      })
+    }
   }
-
   # closeAllConnections()
+  if ( from_method != "get_metadata_from_article@scrap_meta_in_head" ) { names(df) <- output_names }
   return(df)
 }
 
@@ -172,7 +225,6 @@ ojrs_scrap <- function (url , verbose , method, from) {
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
 #' @param url Character vector.
-#' @param method String. Available methods: scrap_by_class_convention
 #' @param verbose Logical.
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
 #' @examples
@@ -202,7 +254,7 @@ get_oai_metadata_from_article <- function ( url , verbose = FALSE ) {
 
     if (verbose) { message("pre-processing url ", url[i]) }
     process_url <- ojsr::process_urls(url[i])
-    oai_base_url <- process_url$assume_oai[1]
+    oai_base_url <- process_url$conventional_oai[1]
     article_id <- process_url$articleId[1]
     identify_url <- paste0(oai_base_url, "/?verb=Identify")
     if (verbose) { message("identifying on ", identify_url) }
@@ -214,7 +266,9 @@ get_oai_metadata_from_article <- function ( url , verbose = FALSE ) {
     }, error = function(err) { warning(paste("error processing ", identify_url));
     })
 
-    if ( ! "error" %in% names(identify_list[[1]]) ) {
+    if ( 'error' %in% names(identify_list[[1]]) ) {
+      warning("OAI identity records could not be found on ", identify_url)
+    } else {
       identifier <- identify_list[[1]]$Identify$description$`oai-identifier` %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE, row.names = FALSE)
       baseIdentifier <- paste0(
         identifier$scheme,
@@ -249,9 +303,6 @@ get_oai_metadata_from_article <- function ( url , verbose = FALSE ) {
       } else {
         warning("OAI record not found on ", record_url, " for url ", url[i])
       }
-
-    } else {
-      warning("OAI identity records could not be found on ", identify_url)
     }
 
   }

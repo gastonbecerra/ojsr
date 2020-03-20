@@ -2,16 +2,21 @@
 % Please edit documentation in R/scrapers.R
 \name{get_metadata_from_article}
 \alias{get_metadata_from_article}
-\title{Scraps OJS article pages for galleys urls}
+\title{xxx}
 \usage{
-get_metadata_from_article(url, method = "scrap_meta_in_head", verbose = FALSE)
+get_metadata_from_article(
+  url,
+  use_conventional_url = TRUE,
+  verbose = FALSE,
+  method = "scrap_meta_in_head"
+)
 }
 \arguments{
 \item{url}{Character vector.}
 
-\item{method}{String. Available methods: scrap_by_class_convention}
-
 \item{verbose}{Logical.}
+
+\item{method}{String. Available methods: scrap_by_class_convention}
 }
 \value{
 A dataframe with the urls of the articles linked from the OJS issue page.

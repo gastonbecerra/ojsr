@@ -1,0 +1,83 @@
+
+
+
+
+
+
+
+
+
+
+
+
+## get_metadata_from_article: Retrieve metadata from article pages
+
+If you have a list of articles urls, you may retrieve the galley links (full-content pdfs and other reading formats, and also any supplementary files) via  `get_galley_urls_from_article()`.
+
+Galleys are usually linked from other type of pages too, other than articles, like issues ToC, or other galleys inline readers. However, the safest place to search for them is the "view article" page. You could pre-process your url list with `process_urls()` and use the  *conventional-to-be-right* url  (**$conventional_article**).
+
+For the following example, let's say we want to get the meta data from the articles of a complete issue. We should start by crawling the issue to scrape the articles, and after processing the urls, we'll pass them to `get_galley_urls_from_article()`
+
+```{r}
+issue <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/view/41' # one particular issue
+what_type_of_url <- ojsr::process_urls(issue) # we'll validate our input
+articles <- ojsr::get_article_urls_from_issue(what_type_of_url$conventional_issue)
+metadata <- ojsr::get_metadata_from_article(articles$links)
+```
+
+Available methods:
+
+- **scrap_meta_in_head** (default): retrieves the <meta> tags in the <head> of the page;
+
+Result is in a long-format (tidy-ish) dataframe, containing:
+
+- the provided url in "url" (col1),
+- the name of the property/metadata (e.g., "DC.Date.created" for the Date of creation) in "meta_data_name" (col2), (for a list of available you could do: `sort( unique( metadata$meta_data_name  ) )` )
+- the actual value of the metatag in "meta_data_content" (col3),
+- the standard in which the content is annotated in "meta_data_ scheme" (col4),
+-and the language of the metadata in "meta_data_xmllang" (col5)
+
+Then, you may analize this dataframe to explore bibliometric properties of the collection of articles.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## get_oai_metadata_from_article: Retrieve OAI records from article url
+
+An alternative to webscraping metadata from the html of article pages is to retrieve their OAI-PMH (Open Archives Initiative Protocol for 'Metadata' Harvesting) records <http://www.openarchives.org/OAI/openarchivesprotocol.html>
+
+`get_oai_metadata_from_article()` will try to access access the OAI records for any OJS article page url. To do so, it will use `process_urls()` to get the *expected* OAI access url and parse the article ID.
+
+**Note:** If you are interested in working with OAI records, you may want to check Scott Chamberlain's **OAI package for R** <https://CRAN.R-project.org/package=oai>. If you only have the OJS home url, and would like to check all the article's OAI records at one shot, an interesting option is to parse it with `ojsr::process_urls()` and passing the *conventional-to-be-right* OAI url (**$conventional_oai**) to `oai::list_identifiers()`.
+
+For the following example, let's say we want to get the meta data from 2 particular articles. In this case, we can skip calling `process_urls()`, since `get_oai_metadata_from_article()` will already do it for us.
+
+```{r}
+url_sample <- c(
+  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903',
+  'http://fundacionmenteclara.org.ar/revista/index.php/RCA/article/download/43/54'
+)
+metadata <- ojsr::get_oai_metadata_from_article(url = url_sample)
+
+```
+
+Result is in a long-format (tidy-ish) dataframe, containing:
+
+- the provided url in "url" (col1),
+- the name of the property/metadata (e.g., "DC.Date.created" for the Date of creation) in "meta_data_name" (col2), (for a list of available you could do: `sort( unique( metadata$meta_data_name  ) )` )
+- the actual value of the metatag in "meta_data_content" (col3)
+
+
+
+
+- If you are interested in retrieving meta-data through OAI protocol, you may check **OAI package for R** <https://CRAN.R-project.org/package=oai> (see "get_oai_metadata_from_article" below).

@@ -6,16 +6,19 @@
 \usage{
 get_article_urls_from_issue(
   url,
-  method = "scrap_by_href_convention_no_classes",
-  verbose = FALSE
+  use_conventional_url = TRUE,
+  verbose = FALSE,
+  method = "scrap_by_href_convention_no_classes"
 )
 }
 \arguments{
 \item{url}{Character vector.}
 
-\item{method}{String. Available methods: scrap_by_href_convention_no_classes, scrap_by_href_convention_no}
+\item{use_conventional_url}{Logical. Should ojsr parse the urls given to form the conventional url to scrap?}
 
 \item{verbose}{Logical.}
+
+\item{method}{String. Available methods: scrap_by_href_convention_no_classes, scrap_by_href_convention_no}
 }
 \value{
 A dataframe with the urls of the articles linked from the OJS issue page.

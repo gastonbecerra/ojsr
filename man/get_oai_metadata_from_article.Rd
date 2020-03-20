@@ -10,8 +10,6 @@ get_oai_metadata_from_article(url, verbose = FALSE)
 \item{url}{Character vector.}
 
 \item{verbose}{Logical.}
-
-\item{method}{String. Available methods: scrap_by_class_convention}
 }
 \value{
 A dataframe with the urls of the articles linked from the OJS issue page.
