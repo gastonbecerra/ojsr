@@ -38,10 +38,19 @@ saveRDS(ps,file=paste0("ps_",format(Sys.time(), "%y%m%d_%H%M"),".rds")) # guarda
 rm(ps_articulos,ps_metadata,ps_numeros,ps_revistas,revistas)
 
 
+
 ## ... o arrancamos con todo procesado ------------------
 
 
 # ps <- readRDS("C:/Users/GASTON/Desktop/r/ojsr/pruebas/ps_200320_0218.rds")
+
+
+## otras fuentes ------------------
+
+
+### se pueden scrapear otras fuentes, tipo JSTOR?
+### buscar rOpenSci
+### buscar doc sobre luhmann y ciencia
 
 
 ## descriptivos de la muestra ------------------
@@ -57,6 +66,8 @@ muestra <-
   )
 muestra$metada_articulo <- muestra$metadata / muestra$articulos
 muestra
+
+
 
 # desvalimiento tiene solo 3 metadata x art... no los esta sirviendo
 
@@ -79,16 +90,19 @@ oai_articulosDPS2 <- distinct(oai_articulosDPS)
 
 
 
+## bibliometricos ------------------
+
+### cantidad de autores?
+### paises?
+### idiomas?
+### sexo autores?
+### instituciones?
+### fondos?
+
+## analisis contenido: de keywords ------------------
 
 
 
-
-view(ps$articulos)
-
-nrow(ps$articulos)
-
-options(max.print=100)
-glimpse(ps$articulos)
 
 glimpse(metadata2)
 sort(table(metadata2$name))
@@ -106,7 +120,11 @@ keywords2 <- trimws(unlist(keywords2))
 table(keywords2)
 wordcloud::wordcloud(keywords2, min.freq = 3)
 
+## analisis contenido: de resumenes ------------------
 
+### tm? para que?
+
+## analisis contenido: de contenido completo ------------------
 
 
 ## BAJAR LOS PDF An example of this, using dplyr's filter on format, and download.file:
@@ -116,5 +134,17 @@ wordcloud::wordcloud(keywords2, min.freq = 3)
 #    download.file( url_download[i], mode = 'wb' , destfile = paste0(getwd(),"/",i,".pdf"))
 # }
 
+### unidad de analisis?
+### metodologia?
+### muestras?
+### variables?
+### problemas de referencia?
+### xxx ?
 
+
+## analisis contenido: referencias ------------------
+
+
+### autores mas citados?
+### redes de citado?
 
