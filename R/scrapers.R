@@ -242,10 +242,6 @@ get_oai_metadata_from_article <- function ( url , verbose = FALSE ) {
   if ( !is.character(url) ) { stop("url must be a character string/vector", call. = FALSE) }
   if ( !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
 
-  # oaiBase == en tamaño que url, o 1
-  # oaiIdentifier == en tamaño que url, o 1
-  # article_id == en tamaño que url, o 1
-
   oai_base_url = ""
   oai_identifier = ""
   article_id = NA
@@ -299,10 +295,10 @@ get_oai_metadata_from_article <- function ( url , verbose = FALSE ) {
         tryCatch({
           registro <- record[[1]]$GetRecord$record$metadata$dc %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE, row.names = FALSE)
           registro_tidy <- registro %>%
-            cbind( url = url[i] ) %>%
+            cbind( article = url[i] ) %>%
             # ,conventional_article = process_url$conventional_article[1], deparse.level = TRUE
             cbind( baseUrl = process_url$baseUrl[1] ) %>%
-            gather( key=meta_data_name , value=meta_data_content, -c(url, baseUrl))
+            gather( key=meta_data_name , value=meta_data_content, -c(article, baseUrl))
 
           registro_tidy$meta_data_name <- sub('\\..*', '', registro_tidy$meta_data_name)
         }, warning = function(war) { warning(paste("warning processing ", url[i])) ;

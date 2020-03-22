@@ -238,7 +238,7 @@ metadata_oai <- ojsr::get_oai_metadata_from_article(url = socPsy_articles, verbo
 
 Result is in a long-format dataframe, containing:
 
-1. *url* - the url you provided
+1. *article* - the url you provided
 2. *baseUrl* - if use_conventional_url = TRUE, the baseUrl from ojs::process_url; otherwise, ""
 3. *meta_data_name* - name of the property/metadata (e.g., "DC.Date.created" for the Date of creation) 
 4. *meta_data_content* - the actual value of the metatag

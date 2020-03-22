@@ -1,10 +1,40 @@
-pendientes
+pendientes pack
 ----------
 
 4) scrapear una busqueda?
+# https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/search/search?simpleQuery=becerra&searchField=query
 2) test
 3) CRAN
 7) descripciones en las funciones
+
+
+
+
+
+
+
+
+
+pendientes proto
+----------
+
+
+# 2do: revPsycho esta mostrando galeradas en article?
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -13,7 +43,7 @@ que pasa cuando mando un url vacio?
 
 scrapear una busqueda
 # 2do: search form or result?
-# https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/search/search?simpleQuery=becerra&searchField=query
+
 
 
 
