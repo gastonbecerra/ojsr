@@ -228,17 +228,18 @@ keywords %>% group_by(baseUrl, keywords) %>% tally(sort=TRUE) %>% top_n(wt = n, 
 glimpse(keywords)
 
 ### correlaciones entre keywords (en un mismo doc) # https://www.tidytextmining.com/ngrams.html#
-correlaciones <- keywords %>% group_by(keywords) %>% filter(n() > 2) %>% ungroup() %>%
 
-    widyr::pairwise_cor(item = keywords, feature = article, sort = TRUE, method = "pearson")
+correlaciones <- keywords %>% group_by(keywords) %>% filter(n() > 2) %>% ungroup() %>%
+  widyr::pairwise_cor(item = keywords, feature = article, sort = TRUE, method = "pearson")
 
 library(igraph)
 library(ggraph)
 
-corr_graph <- correlaciones %>% filter(correlation>0.3) %>% igraph::graph_from_data_frame()
-corr_graph
+correlaciones2 <- correlaciones %>% filter(correlation>0.2)
+corr_graph <- correlaciones2 %>% igraph::graph_from_data_frame()
+corr_graph <- set_edge_attr(corr_graph, "weight", value= correlaciones2$correlation)
 ggraph::ggraph(corr_graph, layout = "fr") +
-  geom_edge_link() +
+  geom_edge_link(aes(alpha=weight, width=weight)) +
   geom_node_point() +
   geom_node_text(aes(label = name), vjust = 1, hjust = 1)
 
