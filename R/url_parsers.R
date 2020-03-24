@@ -1,9 +1,6 @@
 #' Parses URLs according to OJS conventions
 #'
-#' This function parse a string vector of OJS urls to check which (if any) page/function could be referring to,
-#' if there are IDs for articles, issues or galleys.
-#'
-#' It also returns expected ulrs for the scraping functions.
+#' This function parse a string vector of OJS urls to extract IDs and generate expected ulrs for the scraping functions.
 #'
 #' This works by parsing URLs strings against OJS routing conventions. It does not check anything against the actual pages!
 #'
@@ -11,15 +8,12 @@
 #'
 #' @param url Character vector of OJS url(s).
 #' @return A dataframe wich indicates the type of OJS url expected, and the parameters.
-#' Please refer to vignette ("Parse OJS urls" section).
+#' Please refer to vignette.
 #' @examples
 #' process_urls(c('https://firstmonday.org/ojs/index.php/fm/article/view/9540',
 #'     'http://imed.pub/ojs/index.php/iam/article/view/1650'))
 #' @export
 process_urls <- function( url ) {
-
-  # 2do: remove the as.integer validation for IDs. i.e., https://fundacionmenteclara.org.ar/revista/index.php/RCA/issue/view/2019-Vol4-1
-  # 2do: include a correction parameter (-1, -2) for ojs_url_base_position + x, so you can skip journal name in single-OJS installations
 
   if( !is.character(url) ) { stop("url must be a character string or vector") }
 

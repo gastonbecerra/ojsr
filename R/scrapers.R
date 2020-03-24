@@ -1,20 +1,27 @@
-#' Scraps an OJS archive page for issues urls
+#' Scraps an OJS page for issue links
 #'
-#' This functions xxx
+#' Takes a vector of OJS urls and scraps them to retrieve the links to OJS issues.
+#'
+#' Search criteria: links containing “/issue/view” (method='scrap_by_href_convention', default).
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
-#' @param url Character vector.
+#' @param input_url Character vector.
 #' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
 #' @param method String. Available methods: scrap_by_href_convention
 #' @param verbose Logical.
-#' @return A dataframe with the urls of the articles linked from the OJS issue page.
+#' @return A long-format dataframe with the url you provided (input_url) and the issues url scraped (output_url)
+#'
 #' @examples
 #'
-#'     xxx
+#'     socPsy_urls <- c( # argentinian social psychology journals
+#'        'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive', # points at the archive of issues
+#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903' # points at an article; ojsr will use process_url() to form the right link to scrap
+#'     )
+#'     issues <- ojsr::get_issue_url(socPsy_urls, use_conventional_url = TRUE, verbose = TRUE)
 #'
 #' @export
-get_issue_url <- function ( input_url , use_conventional_url = TRUE, verbose = FALSE, method = "scrap_by_href_convention" ) {
+get_issue_url <- function ( input_url , use_conventional_url = TRUE, method = "scrap_by_href_convention", verbose = FALSE ) {
   df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_issue_url")
   return(df)
 }
@@ -23,24 +30,23 @@ get_issue_url <- function ( input_url , use_conventional_url = TRUE, verbose = F
 
 
 
-#' Scraps an OJS issue page for articles urls
+#' Scraps an OJS page for article links
 #'
-#' This functions xxx
+#' Takes a vector of OJS urls and scraps them to retrieve the links to OJS articles
+#'
+#' Search criteria: links containing "/article/view” (method='scrap_by_href_convention_no_classes', default), and the same without filtering (method='scrap_by_href_convention'). (Please refer to vignette.)
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
-#' @param url Character vector.
+#' @param input_url Character vector.
 #' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
-#' @param method String. Available methods: scrap_by_href_convention_no_classes, scrap_by_href_convention_no
+#' @param method String. Available methods: scrap_by_href_convention_no_classes (default), scrap_by_href_convention
 #' @param verbose Logical.
-#' @return A dataframe with the urls of the articles linked from the OJS issue page.
-#' @examples
-#'
-#'     xxx
+#' @return A long-format dataframe with the url you provided (input_url) and the articles url scraped (output_url)
 #'
 #' @export
 #'
-get_article_url <- function ( input_url , use_conventional_url = TRUE, verbose = FALSE, method = "scrap_by_href_convention_no_classes" ) {
+get_article_url <- function ( input_url , use_conventional_url = TRUE, method = "scrap_by_href_convention_no_classes", verbose = FALSE ) {
   df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_article_url")
   return(df)
 }
@@ -49,24 +55,33 @@ get_article_url <- function ( input_url , use_conventional_url = TRUE, verbose =
 
 
 
-#' Scraps OJS article pages for galleys urls
+#' Scraps an OJS page for galley links
 #'
-#' This functions xxx
+#' Takes a vector of OJS urls and scraps them to retrieve the links to OJS galleys
+#'
+#' Search criteria: links containing containing classes “file”, “download” or “obj_galley_link” (method='scrap_by_class_convention', default)
+#'
+#' Galleys are the final presentation version of the content of the articles.
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
-#' @param url Character vector.
+#' @param input_url Character vector.
 #' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
 #' @param method String. Available methods: scrap_by_class_convention
 #' @param verbose Logical.
-#' @return A dataframe with the urls of the articles linked from the OJS issue page.
+#' @return A long-format dataframe with the url you provided (input_url), the articles url scraped (output_url),
+#' the format of the galley (format), and the url that forces download of the galley (download_url)
 #' @examples
 #'
-#'     xxx
+#'     socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
+#'        'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657', # 2 galleys: pdf and mp3
+#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # 1 galley: pdf
+#'     )
+#'     galleys <- ojsr::get_galley_url(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE)
 #'
 #' @export
 #'
-get_galley_url <- function ( input_url , use_conventional_url = TRUE, verbose = FALSE, method =  "scrap_by_class_convention" ) {
+get_galley_url <- function ( input_url , use_conventional_url = TRUE, method =  "scrap_by_class_convention", verbose = FALSE ) {
   df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_galley_url")
   return(df)
 }
@@ -74,20 +89,28 @@ get_galley_url <- function ( input_url , use_conventional_url = TRUE, verbose = 
 
 
 
-#' xxxx
+#' Creates OJS search result urls
 #'
-#' This functions xxx
+#' Takes a vector of OJS urls and a string for search criteria to compose the search url.
+#'
+#' If check_pagination = TRUE, it runs the search in OJS to see if pagination is involved, and returns the url for the search result pages. You may then pass these urls to any other get_*_url() function. Please refer to the vignette.
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
-#' @param url Character vector.
-#' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
+#' @param input_url Character vector.
+#' @param search_criteria Character string
+#' @param check_pagination Logical.
 #' @param method String. Available methods: scrap_by_href_convention
 #' @param verbose Logical.
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
 #' @examples
 #'
-#'     xxx
+#'     socPsy_journals <- c( # 2 social psychology journals
+#'         'https://revistapsicologia.uchile.cl/index.php/RDP/', # home url
+#'         'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current' # current issue url
+#'     )
+#'     search_criteria <- "social representations"
+#'     search_results <- ojsr::get_search_url(socPsy_journals, search_criteria = "psicología social", check_pagination = TRUE, verbose = TRUE)
 #'
 #' @export
 get_search_url <- function ( input_url , search_criteria, check_pagination = TRUE, verbose = FALSE) {
@@ -104,23 +127,33 @@ get_search_url <- function ( input_url , search_criteria, check_pagination = TRU
 
 
 
-#' xxx
+
+#' Scraps metadata from html of OJS pages
 #'
-#' This functions xxx
+#' Takes a vector of OJS urls and and scraps the metadata written in the html.
+#'
+#' Search criteria: <meta> tags in the <head> section of the html (method='scrap_meta_in_head', default)
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
-#' @param url Character vector.
-#' @param method String. Available methods: scrap_by_class_convention
+#' @param input_url Character vector.
+#' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
+#' @param method String. Available methods: scrap_meta_in_head
 #' @param verbose Logical.
-#' @return A dataframe with the urls of the articles linked from the OJS issue page.
+#' @return A long-format dataframe with the url you provided (input_url), the name of the metadata (meta_data_name),
+#' the content of the metadata (meta_data_content), the standard in which the content is annotated (meta_data_scheme),
+#' and the language in which the metadata was entered (meta_data_xmllang)
 #' @examples
 #'
-#'     xxx
+#'     socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
+#'         'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing at the article page
+#'         'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing at a particular galley (xml)
+#'     )
+#'     metadata <- ojsr::get_meta_from_html(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE)
 #'
 #' @export
 #'
-get_meta_from_html <- function ( input_url , use_conventional_url = TRUE, verbose = FALSE, method =  "scrap_meta_in_head") {
+get_meta_from_html <- function ( input_url , use_conventional_url = TRUE, method =  "scrap_meta_in_head", verbose = FALSE) {
   df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_meta_from_html")
   return(df)
 }
@@ -273,18 +306,25 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from, 
 
 
 
-#' Get OAI metadata for an article
+#' Get OAI metadata from an OJS article url
 #'
-#' This functions xxx
+#' This functions access (within the OJS) the OAI records for any article for which you provided an url.
+#'
+#' Several limitations are in place. Please refer to vignette.
 #'
 #' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
-#' @param url Character vector.
+#' @param input_url Character vector.
 #' @param verbose Logical.
-#' @return A dataframe with the urls of the articles linked from the OJS issue page.
+#' @return A long-format dataframe with the url you provided (input_url), the name of the metadata (meta_data_name),
+#' and the content of the metadata (meta_data_content).
 #' @examples
 #'
-#'     xxx
+#'     socPsy_articles <- c( # 2 articles on social psychology, specifically social representations theory
+#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing to the article page
+#'        'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing a particular galley (xml)
+#'     )
+#'     metadata_oai <- ojsr::get_meta_from_oai(socPsy_articles, verbose = TRUE)
 #'
 #' @export
 #'
