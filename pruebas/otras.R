@@ -1,3 +1,42 @@
+
+from = "fiesta"
+from = "chau"
+method = "metodo1" #metodo2
+
+xpath <- switch ( from,
+  "fiesta" = '//a[contains(@href, "/issue/view/")]',
+  "chau" = { xpath <- swith( method,
+    "metodo1" = '//a[contains(@href, "/article/view/")',
+    "metodo12" = '//a[contains(@href, "/article/view/") and not(contains(@class, "file")) and not(contains(@class, "pdf"))]'
+    )  },
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 urlposta <-           'http://fundacionmenteclara.org.ar/revista/index.php/RCA/issue/view/2018-Vol3-2'
 ojs_url_path <- urltools::path(urlposta) # url - domain = /index.php/journal/page/function/arg1/arg2/arg3
 

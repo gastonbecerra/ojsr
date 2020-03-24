@@ -1,8 +1,9 @@
 pendientes pack
 ----------
 
-4) scrapear una busqueda?
-# https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/search/search?simpleQuery=becerra&searchField=query
+
+
+2) probar con urls falopa... puse un closeallconn anda?
 2) test
 3) CRAN
 7) descripciones en las funciones
@@ -10,7 +11,8 @@ pendientes pack
 
 
 
-
+volver a poner baseUrl?
+df <- rbind(df, data.frame(cbind( url_input[i] , if_else(use_conventional_url, url_parsed$baseUrl[i], ""), links_url, links_formats , links_force ), stringsAsFactors = FALSE))
 
 
 

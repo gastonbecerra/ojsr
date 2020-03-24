@@ -16,6 +16,7 @@ Imports:
     stringr,
     tidyverse,
     urltools,
+    utils,
     xml2,
     purrr
 Suggests: 
