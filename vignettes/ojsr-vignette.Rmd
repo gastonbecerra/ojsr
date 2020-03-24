@@ -128,9 +128,9 @@ Result is in a long-format dataframe, containing:
 
 
 
-## get_article_urls_from_issue: Retrieve articles urls from issue pages
+## get_article_urls_from_search_results: Retrieve articles urls from issue pages
 
-`get_article_urls_from_issue()` takes a vector of OJS urls pointing at the issues of a journal (e.g., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/319/showToc>) and scraps them to retrieve the links to articles.
+`get_article_urls_from_search_results()` takes a vector of OJS urls pointing at the issues of a journal (e.g., <https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/319/showToc>) and scraps them to retrieve the links to articles.
 
 Issue pages in OJS may or may not show a cover page, and show or not show the table of contents (this is where the links to the article reside). Usually, you can force the display of the ToC by adding "/ShowToC" to the url. This is all taken care of if you keep `use_conventional_url = TRUE` (default): ojsr will parse the urls given with `process_urls()` to form the conventional url ($conventional_issue) for the issue page.
 

@@ -100,7 +100,7 @@ rm(oai_articulosDPS, oai_articulosDPS_viejo,articulosDPS)
 
 
 saveRDS(ps,file=paste0("ps_","r",nrow(ps$revistas),"_",format(Sys.time(), "%y%m%d_%H%M"),".rds")) # guardamos en disco, para evitar este paso de ahora en mas
-ps <- readRDS("ps_r8_200321_2104.rds")
+ps <- readRDS("ps_r8_200322_1933.rds")
 
 
 
@@ -214,6 +214,8 @@ saveRDS(ps,file=paste0("ps_","r",nrow(ps$revistas),"_",format(Sys.time(), "%y%m%
 keywords <- ps$metadata %>% filter(meta_data_name=="citation_keywords", meta_data_xmllang=="es", trimws(meta_data_content)!="") %>% select(keywords = meta_data_content, baseUrl, article) %>% mutate(keywords=limpiar(keywords))
 keywords <- keywords %>% anti_join(keywords %>% filter(baseUrl == "https://revistas.javeriana.edu.co/index.php/revPsycho"))
 
+# 2do: procesamiento separar "psicologia xxx", dejando 2 keywords? (con un rbind, modificado?)
+
 rm(limpiar,separadores)
 
 ### frecuencias
@@ -249,7 +251,7 @@ correlaciones %>% filter(item1=="personalidad")
 correlaciones %>% filter(item1=="actitudes")
 correlaciones %>% filter(item1=="representaciones sociales")
 correlaciones %>% filter(item1=="psicologia")
-
+correlaciones %>% filter(item1=="psicologia social")
 
 
 ## analisis contenido: de resumenes ------------------
