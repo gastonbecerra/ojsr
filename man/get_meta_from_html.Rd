@@ -2,33 +2,43 @@
 % Please edit documentation in R/scrapers.R
 \name{get_meta_from_html}
 \alias{get_meta_from_html}
-\title{xxx}
+\title{Scraps metadata from html of OJS pages}
 \usage{
 get_meta_from_html(
   input_url,
   use_conventional_url = TRUE,
-  verbose = FALSE,
-  method = "scrap_meta_in_head"
+  method = "scrap_meta_in_head",
+  verbose = FALSE
 )
 }
 \arguments{
+\item{input_url}{Character vector.}
+
+\item{use_conventional_url}{Logical. Should ojsr parse the urls given to form the conventional url to scrap?}
+
+\item{method}{String. Available methods: scrap_meta_in_head}
+
 \item{verbose}{Logical.}
-
-\item{method}{String. Available methods: scrap_by_class_convention}
-
-\item{url}{Character vector.}
 }
 \value{
-A dataframe with the urls of the articles linked from the OJS issue page.
+A long-format dataframe with the url you provided (input_url), the name of the metadata (meta_data_name),
+the content of the metadata (meta_data_content), the standard in which the content is annotated (meta_data_scheme),
+and the language in which the metadata was entered (meta_data_xmllang)
 }
 \description{
-This functions xxx
+Takes a vector of OJS urls and and scraps the metadata written in the html.
 }
 \details{
+Search criteria: <meta> tags in the <head> section of the html (method='scrap_meta_in_head', default)
+
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 }
 \examples{
 
-    xxx
+    socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
+        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing at the article page
+        'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing at a particular galley (xml)
+    )
+    metadata <- ojsr::get_meta_from_html(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE)
 
 }

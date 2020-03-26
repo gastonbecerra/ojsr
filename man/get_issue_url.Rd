@@ -2,35 +2,41 @@
 % Please edit documentation in R/scrapers.R
 \name{get_issue_url}
 \alias{get_issue_url}
-\title{Scraps an OJS archive page for issues urls}
+\title{Scraps an OJS page for issue links}
 \usage{
 get_issue_url(
   input_url,
   use_conventional_url = TRUE,
-  verbose = FALSE,
-  method = "scrap_by_href_convention"
+  method = "scrap_by_href_convention",
+  verbose = FALSE
 )
 }
 \arguments{
-\item{use_conventional_url}{Logical. Should ojsr parse the urls given to form the conventional url to scrap?}
+\item{input_url}{Character vector.}
 
-\item{verbose}{Logical.}
+\item{use_conventional_url}{Logical. Should ojsr parse the urls given to form the conventional url to scrap?}
 
 \item{method}{String. Available methods: scrap_by_href_convention}
 
-\item{url}{Character vector.}
+\item{verbose}{Logical.}
 }
 \value{
-A dataframe with the urls of the articles linked from the OJS issue page.
+A long-format dataframe with the url you provided (input_url) and the issues url scraped (output_url)
 }
 \description{
-This functions xxx
+Takes a vector of OJS urls and scraps them to retrieve the links to OJS issues.
 }
 \details{
+Search criteria: links containing “/issue/view” (method='scrap_by_href_convention', default).
+
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 }
 \examples{
 
-    xxx
+    socPsy_urls <- c( # argentinian social psychology journals
+       'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive', # points at the archive of issues
+       'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903' # points at an article; ojsr will use process_url() to form the right link to scrap
+    )
+    issues <- ojsr::get_issue_url(socPsy_urls, use_conventional_url = TRUE, verbose = TRUE)
 
 }

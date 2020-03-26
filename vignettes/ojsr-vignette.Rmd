@@ -20,6 +20,19 @@ library(knitr)
 ```
 
 
+# PENDIENTES, ANTES DE CRAN
+
+```{r eval=FALSE, include=FALSE}
+library(ojsr)
+ojsr::get_issue_url(input_url = "http://revistas.innovacionumh.es/index.php?journal=rpsa&page=index") # genera error y muere
+# hay que cerrar conexiones
+
+```
+
+
+
+
+
 # Overview
 
 The aim of this package is to aid you in several OJS tasks, such as: 
@@ -65,13 +78,12 @@ library(tidyverse) # we'll use dplyr and tidy several times in the examples
 
 ## process_urls: Parse urls to check what type of OJS page they point at
 
-Let's say you have a bunch of OJS article urls you'd like to scrap their meta-data, or a curated list of journals you'd like to crawl completely. However, not all of them may be poiting to the *right* type of OJS page for your purposes (e.g., articles urls you collected may be downloading pdf directly, so you won't be able to scrap meta-data; or the issues may be pointing at cover pages that do not include ToCs). 
+`process_urls()` allows you to parse a list of urls against OJS routing conventions to extract the parameters invoked (e.g., article, issues, galley IDs) and generate the *conventional* url for specific purposes, such as scraping meta-data from articles, or scraping the list of issues from the archive page. `process_urls()` is invoked from `get_*_url*` functions before scraping when `use_contentional_url = TRUE` (default). 
 
-`process_urls()` allows you to parse a list of urls against OJS routing conventions to extract the parameters invoked (e.g., article, issues, galley IDs) and generate the *conventional* url for specific purposes, such as scraping meta-data, or scraping the list of issues for the archive of issues page.
+**Important:** `process_urls()` works with **routing conventions** (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>). The list of urls you input is not actually browsed!
 
-`process_urls()` is invoked from the `get_*_url_from_*` functions before scraping when `use_contentional_url = TRUE` (or default). When a *conventional* url is used for scraping, this is also returned in the resulting dataframe, so you could easily join tables (from scraping articles, issues, archives, etc.) , by creating a table of conventional urls with `process_urls()`.
+If you are planning to summarize information by journal, you may also use `process_urls()` to join links scraped with `get_*_url*` functions, by the `$base_url` of the journal.
 
-`process_urls()` works with **routing conventions** (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>). The list of urls you input is not actually browsed!
 
 ```{r message=FALSE, warning=FALSE}
 # urls pointing at different types of OJS pages

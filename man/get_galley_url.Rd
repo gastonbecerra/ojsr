@@ -2,35 +2,44 @@
 % Please edit documentation in R/scrapers.R
 \name{get_galley_url}
 \alias{get_galley_url}
-\title{Scraps OJS article pages for galleys urls}
+\title{Scraps an OJS page for galley links}
 \usage{
 get_galley_url(
   input_url,
   use_conventional_url = TRUE,
-  verbose = FALSE,
-  method = "scrap_by_class_convention"
+  method = "scrap_by_class_convention",
+  verbose = FALSE
 )
 }
 \arguments{
-\item{use_conventional_url}{Logical. Should ojsr parse the urls given to form the conventional url to scrap?}
+\item{input_url}{Character vector.}
 
-\item{verbose}{Logical.}
+\item{use_conventional_url}{Logical. Should ojsr parse the urls given to form the conventional url to scrap?}
 
 \item{method}{String. Available methods: scrap_by_class_convention}
 
-\item{url}{Character vector.}
+\item{verbose}{Logical.}
 }
 \value{
-A dataframe with the urls of the articles linked from the OJS issue page.
+A long-format dataframe with the url you provided (input_url), the articles url scraped (output_url),
+the format of the galley (format), and the url that forces download of the galley (download_url)
 }
 \description{
-This functions xxx
+Takes a vector of OJS urls and scraps them to retrieve the links to OJS galleys
 }
 \details{
+Search criteria: links containing containing classes “file”, “download” or “obj_galley_link” (method='scrap_by_class_convention', default)
+
+Galleys are the final presentation version of the content of the articles.
+
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 }
 \examples{
 
-    xxx
+    socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
+       'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657', # 2 galleys: pdf and mp3
+       'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # 1 galley: pdf
+    )
+    galleys <- ojsr::get_galley_url(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE)
 
 }

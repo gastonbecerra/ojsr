@@ -2,26 +2,33 @@
 % Please edit documentation in R/scrapers.R
 \name{get_meta_from_oai}
 \alias{get_meta_from_oai}
-\title{Get OAI metadata for an article}
+\title{Get OAI metadata from an OJS article url}
 \usage{
 get_meta_from_oai(input_url, verbose = FALSE)
 }
 \arguments{
-\item{verbose}{Logical.}
+\item{input_url}{Character vector.}
 
-\item{url}{Character vector.}
+\item{verbose}{Logical.}
 }
 \value{
-A dataframe with the urls of the articles linked from the OJS issue page.
+A long-format dataframe with the url you provided (input_url), the name of the metadata (meta_data_name),
+and the content of the metadata (meta_data_content).
 }
 \description{
-This functions xxx
+This functions access (within the OJS) the OAI records for any article for which you provided an url.
 }
 \details{
+Several limitations are in place. Please refer to vignette.
+
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 }
 \examples{
 
-    xxx
+    socPsy_articles <- c( # 2 articles on social psychology, specifically social representations theory
+       'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing to the article page
+       'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing a particular galley (xml)
+    )
+    metadata_oai <- ojsr::get_meta_from_oai(socPsy_articles, verbose = TRUE)
 
 }

@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_search_url}
 \alias{get_search_url}
-\title{xxxx}
+\title{Creates OJS search result urls}
 \usage{
 get_search_url(
   input_url,
@@ -12,11 +12,13 @@ get_search_url(
 )
 }
 \arguments{
+\item{input_url}{Character vector.}
+
+\item{search_criteria}{Character string}
+
+\item{check_pagination}{Logical.}
+
 \item{verbose}{Logical.}
-
-\item{url}{Character vector.}
-
-\item{use_conventional_url}{Logical. Should ojsr parse the urls given to form the conventional url to scrap?}
 
 \item{method}{String. Available methods: scrap_by_href_convention}
 }
@@ -24,13 +26,20 @@ get_search_url(
 A dataframe with the urls of the articles linked from the OJS issue page.
 }
 \description{
-This functions xxx
+Takes a vector of OJS urls and a string for search criteria to compose the search url.
 }
 \details{
+If check_pagination = TRUE, it runs the search in OJS to see if pagination is involved, and returns the url for the search result pages. You may then pass these urls to any other get_*_url() function. Please refer to the vignette.
+
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 }
 \examples{
 
-    xxx
+    socPsy_journals <- c( # 2 social psychology journals
+        'https://revistapsicologia.uchile.cl/index.php/RDP/', # home url
+        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current' # current issue url
+    )
+    search_criteria <- "social representations"
+    search_results <- ojsr::get_search_url(socPsy_journals, search_criteria = "psicologÃ­a social", check_pagination = TRUE, verbose = TRUE)
 
 }

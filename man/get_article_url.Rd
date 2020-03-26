@@ -2,35 +2,32 @@
 % Please edit documentation in R/scrapers.R
 \name{get_article_url}
 \alias{get_article_url}
-\title{Scraps an OJS issue page for articles urls}
+\title{Scraps an OJS page for article links}
 \usage{
 get_article_url(
   input_url,
   use_conventional_url = TRUE,
-  verbose = FALSE,
-  method = "scrap_by_href_convention_no_classes"
+  method = "scrap_by_href_convention_no_classes",
+  verbose = FALSE
 )
 }
 \arguments{
+\item{input_url}{Character vector.}
+
 \item{use_conventional_url}{Logical. Should ojsr parse the urls given to form the conventional url to scrap?}
 
+\item{method}{String. Available methods: scrap_by_href_convention_no_classes (default), scrap_by_href_convention}
+
 \item{verbose}{Logical.}
-
-\item{method}{String. Available methods: scrap_by_href_convention_no_classes, scrap_by_href_convention_no}
-
-\item{url}{Character vector.}
 }
 \value{
-A dataframe with the urls of the articles linked from the OJS issue page.
+A long-format dataframe with the url you provided (input_url) and the articles url scraped (output_url)
 }
 \description{
-This functions xxx
+Takes a vector of OJS urls and scraps them to retrieve the links to OJS articles
 }
 \details{
+Search criteria: links containing "/article/view” (method='scrap_by_href_convention_no_classes', default), and the same without filtering (method='scrap_by_href_convention'). (Please refer to vignette.)
+
 (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
-}
-\examples{
-
-    xxx
-
 }
