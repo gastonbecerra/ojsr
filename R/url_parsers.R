@@ -117,7 +117,7 @@ process_urls <- function( url ) {
   # print(glimpse(url_input))
   # print(glimpse(ojs_url_dataframe))
 
-  ojsr_url_output <- url_input  %>% left_join(ojs_url_dataframe, by="input_url")
+  ojsr_url_output <- dplyr::left_join(url_input, ojs_url_dataframe, by="input_url")
 
   return(ojsr_url_output)
 }

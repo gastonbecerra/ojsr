@@ -19,8 +19,6 @@ get_search_url(
 \item{check_pagination}{Logical.}
 
 \item{verbose}{Logical.}
-
-\item{method}{String. Available methods: scrap_by_href_convention}
 }
 \value{
 A dataframe with the urls of the articles linked from the OJS issue page.
@@ -29,17 +27,19 @@ A dataframe with the urls of the articles linked from the OJS issue page.
 Takes a vector of OJS urls and a string for search criteria to compose the search url.
 }
 \details{
-If check_pagination = TRUE, it runs the search in OJS to see if pagination is involved, and returns the url for the search result pages. You may then pass these urls to any other get_*_url() function. Please refer to the vignette.
+You may then pass these urls to any other get_*_url() function.
 
-(Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+If check_pagination = TRUE, it runs the search in OJS to see if pagination is involved,
+and returns the url for the search result pages.
 }
 \examples{
 
     socPsy_journals <- c( # 2 social psychology journals
-        'https://revistapsicologia.uchile.cl/index.php/RDP/', # home url
-        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current' # current issue url
+        'https://revistapsicologia.uchile.cl/index.php/RDP/',
+        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current'
     )
     search_criteria <- "social representations"
-    search_results <- ojsr::get_search_url(socPsy_journals, search_criteria = "psicologÃ­a social", check_pagination = TRUE, verbose = TRUE)
+    search_results <- ojsr::get_search_url(socPsy_journals,
+        search_criteria = "psicologÃ­a social", check_pagination = TRUE, verbose = TRUE)
 
 }

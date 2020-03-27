@@ -28,17 +28,14 @@ the format of the galley (format), and the url that forces download of the galle
 Takes a vector of OJS urls and scraps them to retrieve the links to OJS galleys
 }
 \details{
-Search criteria: links containing containing classes “file”, “download” or “obj_galley_link” (method='scrap_by_class_convention', default)
-
-Galleys are the final presentation version of the content of the articles.
-
-(Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+Search criteria: links containing classes “file”, “download” or “obj_galley_link”
+(method='scrap_by_class_convention')
 }
 \examples{
 
-    socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
-       'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657', # 2 galleys: pdf and mp3
-       'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # 1 galley: pdf
+    socPsy_articles <- c( # articles on social psychology
+       'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657',
+       'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137'
     )
     galleys <- ojsr::get_galley_url(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE)
 

@@ -11,10 +11,12 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 Imports:
+    dplyr (>= 0.8.3),
+    magrittr,
     oai,
     rvest,
     stringr,
-    tidyverse,
+    tidyr (>= 1.0),
     urltools,
     utils,
     xml2,
@@ -24,4 +26,4 @@ Suggests:
     rmarkdown,
     testthat
 VignetteBuilder: knitr
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.0

@@ -27,7 +27,6 @@ A long-format dataframe with the url you provided (input_url) and the articles u
 Takes a vector of OJS urls and scraps them to retrieve the links to OJS articles
 }
 \details{
-Search criteria: links containing "/article/view” (method='scrap_by_href_convention_no_classes', default), and the same without filtering (method='scrap_by_href_convention'). (Please refer to vignette.)
-
-(Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+Search criteria: links containing "/article/view” (method='scrap_by_href_convention_no_classes'),
+and the same without filtering (method='scrap_by_href_convention'). (Please refer to vignette.)
 }

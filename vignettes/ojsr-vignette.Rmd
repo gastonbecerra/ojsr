@@ -20,19 +20,6 @@ library(knitr)
 ```
 
 
-# PENDIENTES, ANTES DE CRAN
-
-```{r eval=FALSE, include=FALSE}
-library(ojsr)
-ojsr::get_issue_url(input_url = "http://revistas.innovacionumh.es/index.php?journal=rpsa&page=index") # genera error y muere
-# hay que cerrar conexiones
-
-```
-
-
-
-
-
 # Overview
 
 The aim of this package is to aid you in several OJS tasks, such as: 
@@ -69,9 +56,7 @@ So, why ojsr? According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>, as of 
 ```{r message=FALSE, warning=FALSE}
 # let's start by loading the libraries
 library(ojsr) 
-library(tidyverse) # we'll use dplyr and tidy several times in the examples
 ```
-
 
 
 # How to use ojsr?
@@ -200,7 +185,7 @@ socPsy_journals <- c( # 2 social psychology journals
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current' # current issue url
 )
 search_criteria <- "social representations"
-search_results <- ojsr::get_search_url(socPsy_journals, search_criteria = "psicología social", check_pagination = TRUE, verbose = TRUE)
+search_results <- ojsr::get_search_url(input_url = socPsy_journals, search_criteria = "psicología social", check_pagination = TRUE, verbose = TRUE)
 ```
 
 
@@ -238,15 +223,15 @@ Result is in a long-format dataframe (1 inputUrl may result in several rows, one
 
 ## get_meta_from_oai: Retrieve OAI records for OJS articles
 
-**Note:** This function is in a very preliminar stage. If you are interested in working with OAI records, you may want to check Scott Chamberlain's **OAI package for R** <https://CRAN.R-project.org/package=oai>. If you only have the OJS home url, and would like to check all the article's OAI records at one shot, an interesting option is to parse it with `ojsr::process_urls()` and passing the OAI url (`$conventional_oai`) to `oai::list_identifiers()`.
-
 An alternative to webscraping metadata from the html of article pages is to retrieve their OAI-PMH (Open Archives Initiative Protocol for 'Metadata' Harvesting) records <http://www.openarchives.org/OAI/openarchivesprotocol.html>
+
+**Note:** This function is in a very preliminar stage. If you are interested in working with OAI records, you may want to check Scott Chamberlain's **OAI package for R** <https://CRAN.R-project.org/package=oai>. If you only have the OJS home url, and would like to check all the article's OAI records at one shot, an interesting option is to parse it with `ojsr::process_urls()` and passing the OAI url (`$conventional_oai`) to `oai::list_identifiers()`.
 
 `get_meta_from_oai()` will try to access (within the OJS) the OAI records for any article for which you provided an url. Since several parameters and url need to the formed, this function always invokes `ojsr::process_urls()`.
 
 ```{r}
 socPsy_articles <- c( # 2 articles on social psychology, specifically social representations theory
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing to the article page
+  # 'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing to the article page
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing a particular galley (xml)
 )
 metadata_oai <- ojsr::get_meta_from_oai(socPsy_articles, verbose = TRUE)
@@ -257,5 +242,7 @@ Result is in a long-format dataframe (1 inputUrl may result in several rows, one
 1. *input_url* - the url you provided
 2. *meta_data_name* - name of the property/metadata (e.g., "DC.Date.created" for the Date of creation) 
 3. *meta_data_content* - the actual value of the metatag
+4. *meta_data_scheme* - **always returns NA** (included just for easier binding with `get_meta_from_head()` results)
+5. *meta_data_xmllang* - **always returns NA** (included just for easier binding with `get_meta_from_head()` results)
 
 

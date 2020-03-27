@@ -29,16 +29,15 @@ and the language in which the metadata was entered (meta_data_xmllang)
 Takes a vector of OJS urls and and scraps the metadata written in the html.
 }
 \details{
-Search criteria: <meta> tags in the <head> section of the html (method='scrap_meta_in_head', default)
-
-(Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+Search criteria: <meta> tags in the <head> section of the html (method='scrap_meta_in_head')
 }
 \examples{
 
-    socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
-        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing at the article page
-        'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing at a particular galley (xml)
+    socPsy_articles <- c(
+        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137',
+        'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
     )
-    metadata <- ojsr::get_meta_from_html(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE)
+    metadata <- ojsr::get_meta_from_html(socPsy_articles,
+        use_conventional_url = TRUE, verbose = TRUE)
 
 }

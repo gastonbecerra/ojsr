@@ -16,19 +16,16 @@ A long-format dataframe with the url you provided (input_url), the name of the m
 and the content of the metadata (meta_data_content).
 }
 \description{
-This functions access (within the OJS) the OAI records for any article for which you provided an url.
+This functions access OAI records (within OJS) for any article for which you provided an url.
 }
 \details{
 Several limitations are in place. Please refer to vignette.
-
-(Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 }
 \examples{
 
-    socPsy_articles <- c( # 2 articles on social psychology, specifically social representations theory
-       'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing to the article page
-       'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing a particular galley (xml)
+    socPsy_articles <- c(
+       'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137',
+       'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
     )
     metadata_oai <- ojsr::get_meta_from_oai(socPsy_articles, verbose = TRUE)
-
 }

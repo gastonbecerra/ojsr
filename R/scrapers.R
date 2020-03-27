@@ -2,9 +2,7 @@
 #'
 #' Takes a vector of OJS urls and scraps them to retrieve the links to OJS issues.
 #'
-#' Search criteria: links containing “/issue/view” (method='scrap_by_href_convention', default).
-#'
-#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+#' Search criteria: links containing “/issue/view” (method='scrap_by_href_convention').
 #'
 #' @param input_url Character vector.
 #' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
@@ -15,8 +13,8 @@
 #' @examples
 #'
 #'     socPsy_urls <- c( # argentinian social psychology journals
-#'        'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive', # points at the archive of issues
-#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903' # points at an article; ojsr will use process_url() to form the right link to scrap
+#'        'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
+#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
 #'     )
 #'     issues <- ojsr::get_issue_url(socPsy_urls, use_conventional_url = TRUE, verbose = TRUE)
 #'
@@ -34,9 +32,8 @@ get_issue_url <- function ( input_url , use_conventional_url = TRUE, method = "s
 #'
 #' Takes a vector of OJS urls and scraps them to retrieve the links to OJS articles
 #'
-#' Search criteria: links containing "/article/view” (method='scrap_by_href_convention_no_classes', default), and the same without filtering (method='scrap_by_href_convention'). (Please refer to vignette.)
-#'
-#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+#' Search criteria: links containing "/article/view” (method='scrap_by_href_convention_no_classes'),
+#' and the same without filtering (method='scrap_by_href_convention'). (Please refer to vignette.)
 #'
 #' @param input_url Character vector.
 #' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
@@ -59,11 +56,8 @@ get_article_url <- function ( input_url , use_conventional_url = TRUE, method = 
 #'
 #' Takes a vector of OJS urls and scraps them to retrieve the links to OJS galleys
 #'
-#' Search criteria: links containing containing classes “file”, “download” or “obj_galley_link” (method='scrap_by_class_convention', default)
-#'
-#' Galleys are the final presentation version of the content of the articles.
-#'
-#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+#' Search criteria: links containing classes “file”, “download” or “obj_galley_link”
+#' (method='scrap_by_class_convention')
 #'
 #' @param input_url Character vector.
 #' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
@@ -73,9 +67,9 @@ get_article_url <- function ( input_url , use_conventional_url = TRUE, method = 
 #' the format of the galley (format), and the url that forces download of the galley (download_url)
 #' @examples
 #'
-#'     socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
-#'        'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657', # 2 galleys: pdf and mp3
-#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # 1 galley: pdf
+#'     socPsy_articles <- c( # articles on social psychology
+#'        'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657',
+#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137'
 #'     )
 #'     galleys <- ojsr::get_galley_url(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE)
 #'
@@ -93,24 +87,25 @@ get_galley_url <- function ( input_url , use_conventional_url = TRUE, method =  
 #'
 #' Takes a vector of OJS urls and a string for search criteria to compose the search url.
 #'
-#' If check_pagination = TRUE, it runs the search in OJS to see if pagination is involved, and returns the url for the search result pages. You may then pass these urls to any other get_*_url() function. Please refer to the vignette.
+#' You may then pass these urls to any other get_*_url() function.
 #'
-#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+#' If check_pagination = TRUE, it runs the search in OJS to see if pagination is involved,
+#' and returns the url for the search result pages.
 #'
 #' @param input_url Character vector.
 #' @param search_criteria Character string
 #' @param check_pagination Logical.
-#' @param method String. Available methods: scrap_by_href_convention
 #' @param verbose Logical.
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
 #' @examples
 #'
 #'     socPsy_journals <- c( # 2 social psychology journals
-#'         'https://revistapsicologia.uchile.cl/index.php/RDP/', # home url
-#'         'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current' # current issue url
+#'         'https://revistapsicologia.uchile.cl/index.php/RDP/',
+#'         'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current'
 #'     )
 #'     search_criteria <- "social representations"
-#'     search_results <- ojsr::get_search_url(socPsy_journals, search_criteria = "psicología social", check_pagination = TRUE, verbose = TRUE)
+#'     search_results <- ojsr::get_search_url(socPsy_journals,
+#'         search_criteria = "psicología social", check_pagination = TRUE, verbose = TRUE)
 #'
 #' @export
 get_search_url <- function ( input_url , search_criteria, check_pagination = TRUE, verbose = FALSE) {
@@ -132,9 +127,7 @@ get_search_url <- function ( input_url , search_criteria, check_pagination = TRU
 #'
 #' Takes a vector of OJS urls and and scraps the metadata written in the html.
 #'
-#' Search criteria: <meta> tags in the <head> section of the html (method='scrap_meta_in_head', default)
-#'
-#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
+#' Search criteria: <meta> tags in the <head> section of the html (method='scrap_meta_in_head')
 #'
 #' @param input_url Character vector.
 #' @param use_conventional_url Logical. Should ojsr parse the urls given to form the conventional url to scrap?
@@ -145,11 +138,12 @@ get_search_url <- function ( input_url , search_criteria, check_pagination = TRU
 #' and the language in which the metadata was entered (meta_data_xmllang)
 #' @examples
 #'
-#'     socPsy_articles <- c( # 3 articles on social psychology, specifically social representations theory
-#'         'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing at the article page
-#'         'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing at a particular galley (xml)
+#'     socPsy_articles <- c(
+#'         'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137',
+#'         'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
 #'     )
-#'     metadata <- ojsr::get_meta_from_html(socPsy_articles, use_conventional_url = TRUE, verbose = TRUE)
+#'     metadata <- ojsr::get_meta_from_html(socPsy_articles,
+#'         use_conventional_url = TRUE, verbose = TRUE)
 #'
 #' @export
 #'
@@ -159,7 +153,7 @@ get_meta_from_html <- function ( input_url , use_conventional_url = TRUE, method
 }
 
 
-
+#' @importFrom magrittr %>%
 ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from, search_criteria = "", check_pagination = TRUE) {
 
   # basic validation
@@ -318,11 +312,9 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from, 
 
 #' Get OAI metadata from an OJS article url
 #'
-#' This functions access (within the OJS) the OAI records for any article for which you provided an url.
+#' This functions access OAI records (within OJS) for any article for which you provided an url.
 #'
 #' Several limitations are in place. Please refer to vignette.
-#'
-#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 #'
 #' @param input_url Character vector.
 #' @param verbose Logical.
@@ -330,12 +322,12 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from, 
 #' and the content of the metadata (meta_data_content).
 #' @examples
 #'
-#'     socPsy_articles <- c( # 2 articles on social psychology, specifically social representations theory
-#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # url pointing to the article page
-#'        'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # url pointing a particular galley (xml)
+#'     socPsy_articles <- c(
+#'        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137',
+#'        'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
 #'     )
 #'     metadata_oai <- ojsr::get_meta_from_oai(socPsy_articles, verbose = TRUE)
-#'
+#' @importFrom magrittr %>%
 #' @export
 #'
 get_meta_from_oai <- function ( input_url , verbose = FALSE ) {
@@ -390,6 +382,9 @@ get_meta_from_oai <- function ( input_url , verbose = FALSE ) {
 
       tryCatch({
         record <- xml2::read_xml(record_url) %>% xml2::as_list()
+
+        # print(record)
+
       }, warning = function(war) { warning(paste("warning processing ", record_url)) ;
       }, error = function(err) { warning(paste("error processing ", record_url));
       })
@@ -397,17 +392,21 @@ get_meta_from_oai <- function ( input_url , verbose = FALSE ) {
       if ( ! "error" %in% names(record[[1]]) ) {
         tryCatch({
           registro <- record[[1]]$GetRecord$record$metadata$dc %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE, row.names = FALSE)
-          registro_tidy <- registro %>%
-            cbind( input_url = as.character(url[i]) , deparse.level = TRUE) %>%
-            # ,conventional_article = process_url$conventional_article[1], deparse.level = TRUE
-            # cbind( baseUrl = process_url$baseUrl[1] ) %>%
-            gather( key=meta_data_name , value=meta_data_content, -c(input_url))
-          registro_tidy$meta_data_name <- sub('\\..*', '', registro_tidy$meta_data_name)
-          registro_tidy$input_url <- as.character(registro_tidy$input_url)
-        }, warning = function(war) { warning(paste("warning processing ", url[i])) ;
-        }, error = function(err) { warning(paste("error processing ", url[i]));
+          if (!missing(registro)){
+            registro_tidy <- registro %>%
+              cbind( input_url = as.character(url[i]) , deparse.level = TRUE) %>%
+              tidyr::pivot_longer(-input_url, names_to = "meta_data_name", values_to = "meta_data_content")
+            registro_tidy$meta_data_name <- sub('\\..*', '', registro_tidy$meta_data_name)
+            registro_tidy$input_url <- as.character(registro_tidy$input_url)
+            registro_tidy$meta_data_scheme <- NA
+            registro_tidy$meta_data_xmllang <- NA
+            df <- rbind(df,registro_tidy)
+          } else {
+            warning("OAI record could not be parsed for url ", url[i], "\n")
+          }
+        }, warning = function(war) { warning(paste("warning processing ", url[i]),war) ;
+        }, error = function(err) { warning(paste("error processing ", url[i]),err);
         })
-        df <- rbind(df,registro_tidy)
       } else {
         warning("OAI record not found on ", record_url, " for url ", url[i], "\n")
       }
