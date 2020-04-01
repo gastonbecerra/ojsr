@@ -20,7 +20,8 @@
 #'
 #' @export
 get_issue_url <- function ( input_url , use_conventional_url = TRUE, method = "scrap_by_href_convention", verbose = FALSE ) {
-  df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_issue_url")
+  # df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_issue_url")
+  df <- ojrs_scrap_v2(url_input = input_url, verbose = verbose, from = "get_issue_url")
   return(df)
 }
 
@@ -44,7 +45,8 @@ get_issue_url <- function ( input_url , use_conventional_url = TRUE, method = "s
 #' @export
 #'
 get_article_url <- function ( input_url , use_conventional_url = TRUE, method = "scrap_by_href_convention_no_classes", verbose = FALSE ) {
-  df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_article_url")
+  # df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_article_url")
+  df <- ojrs_scrap_v2(url_input = input_url, verbose = verbose, from = "get_article_url")
   return(df)
 }
 
@@ -76,7 +78,8 @@ get_article_url <- function ( input_url , use_conventional_url = TRUE, method = 
 #' @export
 #'
 get_galley_url <- function ( input_url , use_conventional_url = TRUE, method =  "scrap_by_class_convention", verbose = FALSE ) {
-  df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_galley_url")
+  # df <- ojrs_scrap(url_input = input_url, use_conventional_url = use_conventional_url, verbose = verbose, method = method, from = "get_galley_url")
+  df <- ojrs_scrap_v2(url_input = input_url, verbose = verbose, from = "get_galley_url")
   return(df)
 }
 
@@ -158,14 +161,14 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from, 
 
   # basic validation
 
-  if ( missing(url_input) | !is.character(url_input) ) { stop("url must be a character string/vector", call. = FALSE) }
+  if ( missing(url_input) | !is.character(url_input) ) { stop("url must be a character string/vector. maybe introduced a dataframe and forgot to point a column?", call. = FALSE) }
   if ( missing(verbose) | !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
   if ( missing(method) | !is.character(method) ) { stop("method must be a character string", call. = FALSE) }
   if ( missing(use_conventional_url) | !is.logical(use_conventional_url) ) { stop("use_conventional_url must be logical", call. = FALSE) }
 
   df <- data.frame() # object to collect
 
-  # should we (parse urls and) use the conventional url, or should we use user input?
+  # should we (parse urls and) use the conventional url, or should we use user-input?
 
   if ( use_conventional_url ) {
     if (verbose) { message("parsing urls") }
@@ -214,7 +217,8 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from, 
             "get_article_url" = {
               xpath <- switch (method,
                 "scrap_by_href_convention" = '//a[contains(@href, "/article/view/")',
-                "scrap_by_href_convention_no_classes" = '//a[contains(@href, "/article/view/") and not(contains(@class, "galley-link")) and not(contains(@class, "galley")) and not(contains(@class, "file")) and not(contains(@class, "pdf"))]'
+                "scrap_by_href_convention_no_classes" = '//a[contains(@href, "/article/view/") and not(contains(@class, "galley-link")) and not(contains(@class, "galley")) and not(contains(@class, "file")) and not(contains(@class, "pdf"))]',
+                "scrap_by_href_convention_no_classes_long" = '//a[contains(@href, "/article/view/") and not(contains(@class, "galley-link")) and not(contains(@class, "galley")) and not(contains(@class, "file")) and not(contains(@class, "pdf")) and not(contains(@class, "btn"))]'
               )
             }
           )
@@ -227,10 +231,28 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from, 
             df <- rbind(df, newdf)
           }
 
+        } else if ( from_method == "get_article_url@scrap_and_process" ) { # we are crawlling galleys (pdf, xml, mp3, etc.)
+
+          xpath <- '//a[contains(@href, "/article/view/")]'
+          output_names <- c('input_url', 'output_url')
+          links <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href") %>% unique()
+          if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(links), " elements using criteria ", xpath) }
+          if (length(links)>0) {
+
+            links2 <- ojsr::process_urls(links)
+            links3 <- links2$conventional_article %>% unlist() %>% unique()
+
+            #links3 <- links2 %>% dplyr::filter(!is.na(article_id), is.na(galley_id))
+            if (verbose & (length(links2)!=length(links3))) { message("links processed... kept only ", length(links3), " elements with article_id and NOT galley_id") }
+
+            newdf <- data.frame(cbind( url_input[i], links3 ), stringsAsFactors = FALSE)
+            names(newdf) <- output_names
+            df <- rbind(df, newdf)
+          }
 
         } else if ( from_method == "get_galley_url@scrap_by_class_convention" ) { # we are crawlling galleys (pdf, xml, mp3, etc.)
 
-          xpath <- './/a[contains(@class, "file") or contains(@class, "obj_galley_link") or contains(@class, "download")]'
+          xpath <- './/a[contains(@class, "file") or contains(@class, "obj_galley_link") or contains(@class, "download") or contains(@class, "btn")]'
           output_names <- c('input_url','output_url','format','download_url')
           links <- rvest::html_nodes(webpage, xpath = xpath)
           if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(links), " elements using criteria ", xpath) }
@@ -304,6 +326,194 @@ ojrs_scrap <- function (url_input, use_conventional_url, verbose, method, from, 
   }
   return(df)
 }
+
+
+
+
+#' @importFrom magrittr %>%
+ojrs_scrap_v2 <- function ( url_input, verbose, from ) {
+
+  # basic validation
+
+  if ( missing(url_input) | !is.character(url_input) ) { stop("url must be a character string/vector. maybe introduced a dataframe and forgot to point a column?", call. = FALSE) }
+  if ( missing(verbose) | !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
+
+  df <- data.frame() # object to collect
+
+  # parsing the input
+
+  url_parsed <- ojsr::process_urls(url_input)
+
+  # url = conventional url to be scraped
+
+  url <- switch (from,
+    get_issue_url = url_parsed$conventional_archive,
+    get_article_url = url_parsed$conventional_issue,
+    get_galley_url = url_parsed$conventional_article,
+    get_meta_from_html = url_parsed$conventional_article,
+    get_search_url = paste0(url_parsed$conventional_search, search_criteria)
+  )
+
+  # xpath = criteria to look for in the html, depending on who is calling
+
+  xpath <- switch (from ,
+    get_issue_url = '//a[contains(@href, "/issue/view/")]',
+    get_article_url = '//a[contains(@href, "/article/view/")]',
+    get_galley_url = '//a[contains(@href, "/article/view/")]',
+    get_meta_from_html = './/meta',
+    get_search_url = '//a[contains(@href, "searchPage=")]'
+  )
+
+  # output_names = returning table headings
+
+  output_names <- switch (from ,
+    get_issue_url = c('input_url', 'output_url'),
+    get_article_url = c('input_url', 'output_url'),
+    get_galley_url = c('input_url','output_url','format','download_url'),
+    get_meta_from_html = NA, # this one returns a different table format
+    get_search_url = c('input_url', 'output_url')
+  )
+
+  if (verbose) { message("urls parsed; using conventional format for urls instead of input") }
+
+  if (length(url) < 1){ stop("empty url vector to scrap. aborting", call. = FALSE) }
+
+  for (i in 1:length(url)) { # loop for vectorized url input
+
+    if (verbose) { message("trying url ", i, "/" , length(url), " ", url[i]) }
+
+    if (!is.na(url[i])) {
+
+      # reading webpage from url
+
+      webpage_read = FALSE;
+      tryCatch({ # reading the webpage
+        webpage <- xml2::read_html(url[i]) # url page content
+        webpage_read = TRUE;
+      }, warning = function(war) { warning(paste("warning reading ", url[i], " : ",war)) ; closeAllConnections();
+      }, error = function(err) { warning(paste("error reading ", url[i], " : ",err)); closeAllConnections();
+      })
+
+      if ( webpage_read ) {
+
+        # processing scrapped links
+
+        links <- rvest::html_nodes(webpage, xpath = xpath)
+
+        if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(links), " elements using criteria ", xpath) }
+
+        if (length(links)>0) {
+
+          # parsing the scrapped links
+
+          scrapped_links <- data.frame(
+            cbind(
+              input_url = as.character( xml2::xml_attr(x = links, attr = "href") ), # href of link
+              format = trimws(as.character( rvest::html_text(x = links) ) ) # text of link ... only using this with galleys
+            ), stringsAsFactors = FALSE
+          ) %>% unique()
+
+          parsed_links <- dplyr::left_join( scrapped_links, ojsr::process_urls(scrapped_links$input_url) , by="input_url" )
+
+          # returning the conventional form for the scrapped links
+
+          conventional_links <- switch( from,
+            get_issue_url = { parsed_links %>% dplyr::filter( !is.na(issue_id) ) %>% dplyr::select(conventional_issue) %>% unlist() %>% unique() },
+            get_article_url = { parsed_links %>% dplyr::filter( !is.na(article_id), is.na(galley_id) ) %>% dplyr::select(conventional_article) %>% unlist() %>% unique() },
+            get_galley_url = NA, # we need more than 1 variable; we do this in the next block
+            get_meta_from_html = NA, # 2do: xxx
+            get_search_url = NA # 2do: xxx
+          )
+
+          # if galley, preparing a second vector with formats
+
+          if (from=="get_galley_url") {
+            galley_links <- parsed_links %>% dplyr::filter(!is.na(article_id), !is.na(galley_id) ) %>% dplyr::select(input_url, format) %>% unique()
+            conventional_links <- galley_links$input_url %>% as.character()
+            links_formats <- galley_links$format %>% as.character()
+            links_force <- gsub(pattern = "article/view", replacement = "article/download", x = conventional_links, fixed = TRUE)
+          }
+
+          if (verbose & (length(links) != length(conventional_links))) { message("scrapped links processed; kept only ", length(conventional_links), " elements") }
+
+          # preparing the row to return
+
+          newdf <- switch( from,
+            get_issue_url = { data.frame(cbind( url_input[i], conventional_links ), stringsAsFactors = FALSE) },
+            get_article_url = { data.frame(cbind( url_input[i], conventional_links ), stringsAsFactors = FALSE) },
+            get_galley_url = { data.frame( cbind( url_input[i], conventional_links, links_formats, links_force ), stringsAsFactors = FALSE) },
+            get_meta_from_html = NA, # 2do: xxx
+            get_search_url = NA # 2do: xxx
+          )
+
+          names(newdf) <- output_names
+          df <- rbind(df, newdf)
+        }
+      }
+
+
+
+#
+#         } else if ( from_method == "get_meta_from_html@scrap_meta_in_head" ) { # we are scraping meta-data via html
+#
+#           xpath <- './/meta'
+#           meta_data_tags <- rvest::html_nodes(webpage, xpath = xpath)
+#           if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(meta_data_tags), " elements using criteria ", xpath) }
+#           if (class(meta_data_tags)=="xml_nodeset"){
+#             meta_data_tags_list <- xml2::xml_attrs(meta_data_tags)
+#             meta_data_name <- meta_data_content <- meta_data_scheme <- meta_data_xmllang <- NA
+#             for (j in 1:length(meta_data_tags_list)) { # iterate per metadata
+#               if ( "name" %in% names(meta_data_tags_list[[j]]) ) {
+#                 meta_data_name <- unname(c(meta_data_name, meta_data_tags_list[[j]]["name"]))
+#                 if ( "content" %in% names(meta_data_tags_list[[j]]) ) { meta_data_content<-unname(c(meta_data_content,meta_data_tags_list[[j]]["content"])) } else { meta_data_content<-c(meta_data_content, NA) }
+#                 if ( "scheme" %in% names(meta_data_tags_list[[j]]) ) { meta_data_scheme<-unname(c(meta_data_scheme,meta_data_tags_list[[j]]["scheme"])) } else { meta_data_scheme<-c(meta_data_scheme, NA) }
+#                 if ( "xml:lang" %in% names(meta_data_tags_list[[j]]) ) { meta_data_xmllang<-unname(c(meta_data_xmllang,meta_data_tags_list[[j]]["xml:lang"])) } else { meta_data_xmllang<-c(meta_data_xmllang, NA) }
+#               }
+#             }
+#             if (!( purrr::is_empty(meta_data_name) | purrr::is_empty(meta_data_content) )) {
+#               df <- rbind(df,
+#                 as.data.frame(cbind(
+#                   input_url = url_input[i],
+#                   meta_data_name,meta_data_content,meta_data_scheme,meta_data_xmllang), stringsAsFactors = FALSE))
+#             }
+#           }
+#
+
+
+
+
+
+#         } else if ( from_method == "get_search_url@scrap_by_searchPage" ) { # we are composing search urls and checking pagination
+#
+#           output_names <- c('input_url','output_url')
+#           if ( !check_pagination ) { # returning only 1 input = 1 output ulr from process_urls()
+#             df <- rbind(df, data.frame(cbind( url_input[i], url[i] ), stringsAsFactors = FALSE))
+#           } else { # checking pagination to return 1 input and several outputs
+#             xpath <- '//a[contains(@href, "searchPage=")]'
+#             links <- rvest::html_nodes(webpage, xpath = xpath) %>% xml2::xml_attr("href") %>% unique()
+#             if (length(links)>0) {
+#               if (verbose) { message("scraped ", substr(url[i],1,15), " ... found ", length(links)+1, " pagination links using criteria ", xpath) }
+#               links2 <- urltools::param_get(links,"searchPage")
+#               if (!missing(links2)) {
+#                 result_pages <- max(links2$searchPage)
+#                 for (j in 1:result_pages) {
+#                   df <- rbind(df, data.frame(cbind( url_input[i], paste0(url[i],'&searchPage=',j)), stringsAsFactors = FALSE))
+#                 }
+#               }
+#             } else {
+#               if (verbose) { message("scraped ", substr(url[i],1,15), " ... no pagination found using criteria ", xpath) }
+#               newdf <- data.frame(cbind( url_input[i], url[i] ), stringsAsFactors = FALSE)
+#               names(newdf) <- output_names
+#               df <- rbind(df, newdf)
+#             }
+#           }
+
+    }
+
+  }
+  return(df)
+}
+
 
 
 
