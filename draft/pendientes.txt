@@ -1,0 +1,2 @@
+esta bien que si no hay paginacion no tire nada? <<<<<<<<<<<<< no, deberia tirar 1 al menos
+get_issue_url o get_issue_urlSSSSS?

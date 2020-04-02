@@ -18,3 +18,15 @@ bosque_gal2 <- ojsr::get_galley_url(input_url = bosque_art4$output_url[5:7], ver
 
 
 ojsr::get_galley_url("https://revistas.javeriana.edu.co/index.php/revPsycho/article/view/29001",verbose = TRUE)
+
+
+urls <- c('https://revistapsicologia.uchile.cl/index.php/RDP','https://revistas.javeriana.edu.co/index.php/revPsycho/')
+issues <- ojsr::get_issue_url(input_url = urls, verbose = TRUE)
+articles <- ojsr::get_article_url(input_url = issues$output_url, verbose = TRUE)
+galleys <- ojsr::get_galley_url(input_url = articles$output_url, verbose = TRUE)
+search_paginated <- ojsr::get_paginated_search_url(input_url = urls, search_criteria = "psicologia",verbose = TRUE)
+meta <- ojsr::get_meta_from_html(input_url = articles$output_url, verbose = TRUE)
+
+ojsr::get_search_url(input_url = urls, search_criteria = "psicologia", verbose = TRUE)
+
+
