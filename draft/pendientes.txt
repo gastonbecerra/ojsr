@@ -1,2 +1,34 @@
 esta bien que si no hay paginacion no tire nada? <<<<<<<<<<<<< no, deberia tirar 1 al menos
 get_issue_url o get_issue_urlSSSSS?
+ojsr::process_url no anda con https://revistas.javeriana.edu.co/index.php/revPsycho/issue/view/1397/showToc?
+
+ojsr::process_urls(url = "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/593/0")  filtrar por 0... ridiculo
+
+
+search_paginated <- ojsr::get_paginated_search_url(input_url = urls, search_criteria = "psicologia",verbose = TRUE) <<<<<< esta mal 1 resultado al menos
+
+
+
+
+
+
+
+
+
+socPsy_issues_url <- c( #  initial issues from a few social psychology journals
+  'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65', # includes ToC
+  'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/view/Psicodebate%201', # includes ToC
+  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31' # does not include ToC, nor links to articles
+)
+articles <- ojsr::get_articles_from_issue(socPsy_issues_url, verbose = TRUE)
+#> trying conventional url for element 1/3: https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65/showToc
+#> scraped https://revista ... found 14 elements using criteria //a[contains(@href, "/article/view/")]
+#> Warning in ojsr::process_urls(scrapped_links$input_url): NAs introducidos por
+#> coerción
+
+#> Warning in ojsr::process_urls(scrapped_links$input_url): NAs introducidos por
+#> coerción
+
+#> Warning in ojsr::process_urls(scrapped_links$input_url): NAs introducidos por
+#> coerción
+

@@ -12,8 +12,6 @@ get_paginated_search_url(input_url, search_criteria, verbose = FALSE)
 \item{search_criteria}{Character string}
 
 \item{verbose}{Logical.}
-
-\item{check_pagination}{Logical.}
 }
 \value{
 A dataframe with the urls of the articles linked from the OJS issue page.
@@ -23,9 +21,6 @@ Takes a vector of OJS urls and a string for search criteria to compose the searc
 }
 \details{
 You may then pass these urls to any other get_*_url() function.
-
-If check_pagination = TRUE, it runs the search in OJS to see if pagination is involved,
-and returns the url for the search result pages.
 }
 \examples{
 
@@ -35,6 +30,6 @@ and returns the url for the search result pages.
     )
     search_criteria <- "social representations"
     search_results <- ojsr::get_search_url(socPsy_journals,
-        search_criteria = "psicologÃ­a social", check_pagination = TRUE, verbose = TRUE)
+        search_criteria = "psicologÃ­a social", verbose = TRUE)
 
 }
