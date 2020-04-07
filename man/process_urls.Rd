@@ -18,8 +18,6 @@ This function parse a string vector of OJS urls to extract IDs and generate expe
 }
 \details{
 This works by parsing URLs strings against OJS routing conventions. It does not check anything against the actual pages!
-
-(Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
 }
 \examples{
 process_urls(c('https://firstmonday.org/ojs/index.php/fm/article/view/9540',

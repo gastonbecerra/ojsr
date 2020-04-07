@@ -4,8 +4,6 @@
 #'
 #' This works by parsing URLs strings against OJS routing conventions. It does not check anything against the actual pages!
 #'
-#' (Warning: This will only work on OJS v1,v2 installations with none or min customization. Please refer to vignette.)
-#'
 #' @param url Character vector of OJS url(s).
 #' @return A dataframe wich indicates the type of OJS url expected, and the parameters.
 #' Please refer to vignette.
@@ -88,7 +86,7 @@ process_urls <- function( url ) {
 
         if ( ojs_url_page == "article" & ( ojs_url_command == "view" | ojs_url_command == "download" ) ) {
           if ( !is.na ( urlsplit[ ojs_url_base_position + 4 ] ) ) { ojs_url$article_id = as.integer(urlsplit[ ojs_url_base_position + 4 ]) } # there is an article id
-          if ( !is.na ( urlsplit[ ojs_url_base_position + 5 ] ) ) { ojs_url$galley_id = as.integer(urlsplit[ ojs_url_base_position + 5 ]) } # there is an galley id
+          if ( !is.na ( urlsplit[ ojs_url_base_position + 5 ] ) ) { ojs_url$galley_id = urlsplit[ ojs_url_base_position + 5 ] } # there is an galley id
         }
 
         if ( ojs_url_page == "issue" & ( ojs_url_command == "current" | ojs_url_command == "view" | ojs_url_command == "archive" ) ) {

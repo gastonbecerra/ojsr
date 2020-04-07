@@ -23,9 +23,10 @@ Several limitations are in place. Please refer to vignette.
 }
 \examples{
 
-    socPsy_articles <- c(
-       'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137',
-       'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
-    )
-    metadata_oai <- ojsr::get_oai_meta_from_article(socPsy_articles, verbose = TRUE)
+articles <- c(
+  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
+  'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
+)
+metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles, verbose = TRUE)
+
 }

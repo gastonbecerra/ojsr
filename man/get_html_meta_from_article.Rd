@@ -21,10 +21,10 @@ Takes a vector of OJS urls and and scraps the metadata written in the html.
 }
 \examples{
 
-    socPsy_articles <- c(
-        'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137',
-        'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
-    )
-    metadata <- ojsr::get_html_meta_from_article(socPsy_articles, verbose = TRUE)
+articles <- c(
+  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
+  'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
+)
+metadata <- ojsr::get_html_meta_from_article(articles, verbose = TRUE)
 
 }

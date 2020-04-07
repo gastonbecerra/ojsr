@@ -15,14 +15,14 @@ get_articles_from_issue(input_url, verbose = FALSE)
 A long-format dataframe with the url you provided (input_url) and the articles url scrapped (output_url)
 }
 \description{
-Takes a vector of OJS urls and scraps them to retrieve the links to OJS articles
+Takes a vector of OJS urls and scraps them to retrieve links to OJS articles
 }
 \examples{
 
-socPsy_issues_url <- c( #  initial issues from a few social psychology journals
-   'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65', # includes ToC
-   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31' # no ToC
+issues <- c(
+   'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65',
+   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31'
 )
-articles <- ojsr::get_articles_from_issue(socPsy_issues_url, verbose = TRUE)
+articles <- ojsr::get_articles_from_issue(input_url = issues, verbose = TRUE)
 
 }

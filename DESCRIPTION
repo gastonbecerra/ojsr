@@ -1,12 +1,16 @@
 Package: ojsr
 Type: Package
-Title: OJS Scraper for R
+Title: OJS scraper for R
 Version: 0.0.0.9000
 Authors@R: person("Gaston", "Becerra", email = "gaston.becerra@gmail.com",
   role = c("aut", "cre"))
-Description: This package allows you scrap content (bibliographic metadata) from OJS front-pages and/or their OAI interfaces; 
-    This is useful when the OJS Rest API is not available (as in OJS installments prior to v3.1). 
-    It also includes function to parse OJS specific URL conventions. 
+Description: This package allows you to crawl OJS pages and retrieve meta-data from articles. 
+    The aim of this package is to aid you in several OJS tasks, such as: 
+    parse OJS urls, according to routing conventions;
+    crawling archives, issues, articles, galleys; 
+    and retrieving/scraping meta-data from articles.
+    Keep in mind that ojsr rely on OJS routing conventions, 
+    and it is most likely to fail on OJS installments with customized routing.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
