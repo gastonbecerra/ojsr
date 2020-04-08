@@ -21,11 +21,7 @@ library(knitr)
 
 # Overview
 
-The aim of this package is to aid you in several OJS tasks, such as: 
-
-- parse OJS urls, according to routing conventions;
-- crawling archives, issues, articles, galleys;
-- retrieving/scraping meta-data from articles.
+The aim of this package is to aid you in crawling OJS archives, issues, articles, galleys, and search results, and retrieving/scraping meta-data from articles.
 
 **Important: ojsr rely on OJS routing conventions** (<https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>), therefore, it is most likely to fail on OJS installments with customized routing.
 
@@ -52,11 +48,14 @@ So, why ojsr? According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>, as of 
 
 ## process_urls: Parse urls against OJS routing conventions
 
-`process_urls()` allows you to parse a list of urls against OJS **routing conventions** (<https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>) to extract the parameters invoked (e.g., article, issues, galley IDs) and generate the *conventional* url for specific purposes (e.g., if you are scrapping article links from an issue, it will provide the issue ToC).
+`process_urls()` parses a list of urls against OJS **routing conventions** (<https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>) to extract the parameters invoked (e.g., article, issues, galley IDs) and generate the *conventional* urls for different OJS pages. `process_urls()` is invoked from `get_*_url_from_*` functions before and after scraping. On the inputs, it is used to get the url to
+
+get the *conventional* url required for each scrapping purpose; on the outputs, to ensure the right type of page is served. 
+
+
 
 **Important:** `process_urls()` parses urls as character strings. The list of urls you input is not actually browsed!
 
-`process_urls()` is invoked from `get_*_url_from_*` functions before and after scraping. On the inputs, it is used to get the *conventional* url required for each scrapping purpose; on the outputs, to ensure the right type of page is served. 
 
 Also, if you are planning to summarize issue/article/galley/metadata information by journal, you may use `process_urls()` to join the scrapped links by the `$base_url` of the urls.
 
@@ -109,6 +108,8 @@ Result is in a long-format dataframe (1 input_url may result in several rows, on
 
 1. *input_url* - the url you provided
 2. *output_url* - the issues' url scrapped
+
+
 
 
 
