@@ -1,16 +1,51 @@
-#' Parses URLs according to OJS conventions
+#' Parses urls against OJS routing conventions and retrieves the base url
 #'
-#' This function parse a string vector of OJS urls to extract IDs and generate expected ulrs for the scraping functions.
+#' Takes a vector of urls and parses them according to OJS routing conventions, then retrieves OJS base url.
 #'
-#' This works by parsing URLs strings against OJS routing conventions. It does not check anything against the actual pages!
+#' @param input_url Character vector.
+#' @return A long-format dataframe with the url you provided (input_url) and the parsed OJS base url (output_url)
 #'
-#' @param url Character vector of OJS url(s).
-#' @return A dataframe wich indicates the type of OJS url expected, and the parameters.
-#' Please refer to vignette.
 #' @examples
-#' process_urls(c('https://firstmonday.org/ojs/index.php/fm/article/view/9540',
-#'     'http://imed.pub/ojs/index.php/iam/article/view/1650'))
+#'
+#' mix_links <- c(
+#'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
+#'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
+#' )
+#' base_url <- ojsr::parse_base_url(input_url = mix_links)
+#'
+#' @importFrom magrittr %>%
 #' @export
+parse_base_url <- function ( input_url ) {
+  url_parsed <- process_urls(input_url)
+  df <- url_parsed %>% dplyr::select(input_url = input_url, output_url = base_url)
+  return(df)
+}
+
+
+#' Parses urls against OJS routing conventions and retrieves the OAI url
+#'
+#' Takes a vector of urls and parses them according to OJS routing conventions, then retrieves OAI entry url.
+#'
+#' @param input_url Character vector.
+#' @return A long-format dataframe with the url you provided (input_url) and the parsed OAI entry url (output_url)
+#'
+#' @examples
+#'
+#' mix_links <- c(
+#'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
+#'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
+#' )
+#' oai_url <- ojsr::parse_oai_url(input_url = mix_links)
+#'
+#' @importFrom magrittr %>%
+#' @export
+parse_oai_url <- function ( input_url ) {
+  url_parsed <- process_urls(input_url)
+  df <- url_parsed %>% dplyr::select(input_url = input_url, output_url = conventional_oai)
+  return(df)
+}
+
+
 process_urls <- function( url ) {
 
   if( !is.character(url) ) { stop("url must be a character string or vector") }
@@ -31,20 +66,13 @@ process_urls <- function( url ) {
     if (!skipUrl & !grepl(pattern = "index.php", x = urlposta, fixed = TRUE)) { warning( urlposta , " (element ", i ,")", " does not include index.php. Returning NAs", call. = FALSE); skipUrl = TRUE }
     if (!skipUrl & grepl(pattern = "journal=", x = urlposta, fixed = TRUE)) { warning( urlposta , " (element ", i ,")", " uses journal as parameter. Returning NAs", call. = FALSE); skipUrl = TRUE }
 
-    # message("parsing url ", i, "/", length(url),": ",url[i])
-
     ojs_url <- list() # object to populate. converts to df before returning
+
     ojs_url$input_url <- urlposta # input parameter
-    # ojs_url$base_url <- "" # base url of the OJS
     ojs_url$base_url <- NA # base url of the OJS
     ojs_url$issue_id <- NA # if an issue, its ID
     ojs_url$article_id <- NA # if an article, its ID
     ojs_url$galley_id <- NA # if a galley (full-content, supplementary materials, etc.), its ID
-    # ojs_url$conventional_archive <- "" # the *(conventional to be) right* url to scrap the list of issues
-    # ojs_url$conventional_issue <- "" # the *(conventional to be) right* url to scrap the ToC from an issue (if issue_id is present, otherwise "")
-    # ojs_url$conventional_article <- "" # the *(conventional to be) right* url to scrap metadata from an article (if article_id is present, otherwise "")
-    # ojs_url$conventional_oai <- "" # the *(conventional to be) right* url to the OAI records listing
-    # ojs_url$conventional_search <- "" # the *(conventional to be) right* url to a search result
     ojs_url$conventional_archive <- NA # the *(conventional to be) right* url to scrap the list of issues
     ojs_url$conventional_issue <- NA # the *(conventional to be) right* url to scrap the ToC from an issue (if issue_id is present, otherwise "")
     ojs_url$conventional_article <- NA # the *(conventional to be) right* url to scrap metadata from an article (if article_id is present, otherwise "")
@@ -104,18 +132,16 @@ process_urls <- function( url ) {
 
     } else {
 
-      # skipping, generando NA
+      # skip
       ojs_url_row <- as.data.frame( t(unlist(ojs_url)), stringsAsFactors = FALSE)
       ojs_url_dataframe <- rbind(ojs_url_dataframe, ojs_url_row)
 
     }
 
   }
-
-  # print(glimpse(url_input))
-  # print(glimpse(ojs_url_dataframe))
-
   ojsr_url_output <- dplyr::left_join(url_input, ojs_url_dataframe, by="input_url")
-
   return(ojsr_url_output)
 }
+
+
+

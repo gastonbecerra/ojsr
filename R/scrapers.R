@@ -16,7 +16,7 @@
 #'
 #' @export
 get_issues_from_archive <- function ( input_url , verbose = FALSE ) {
-  url_parsed <- ojsr::process_urls(input_url)
+  url_parsed <- process_urls(input_url)
   xpath <- '//a[contains(@href, "/issue/view/")]'
   output_names <- c('input_url', 'output_url')
   df <- ojsr_scrap_v3(input_url = input_url, verbose = verbose, from = "get_issue_url",
@@ -44,7 +44,7 @@ get_issues_from_archive <- function ( input_url , verbose = FALSE ) {
 #' @export
 #'
 get_articles_from_issue <- function ( input_url , verbose = FALSE ) {
-  url_parsed <- ojsr::process_urls(input_url)
+  url_parsed <- process_urls(input_url)
   xpath <- '//a[contains(@href, "/article/view/")]'
   output_names <- c('input_url', 'output_url')
   df <- ojsr_scrap_v3(input_url = input_url, verbose = verbose, from = "get_article_url",
@@ -73,7 +73,7 @@ get_articles_from_issue <- function ( input_url , verbose = FALSE ) {
 #' @export
 #'
 get_galleys_from_article <- function ( input_url , verbose = FALSE ) {
-  url_parsed <- ojsr::process_urls(input_url)
+  url_parsed <- process_urls(input_url)
   xpath <- '//a[contains(@href, "/article/view/")]'
   output_names <- c('input_url','output_url','format','download_url')
   df <- ojsr_scrap_v3(input_url = input_url, verbose = verbose, from = "get_galley_url",
@@ -112,7 +112,7 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
   search_criteria <- gsub(pattern = " ", replacement = "+", x = search_criteria)
 
   df <- data.frame() # object to collect
-  url_parsed <- ojsr::process_urls(input_url) # parsing the input
+  url_parsed <- process_urls(input_url) # parsing the input
   url <- paste0(url_parsed$conventional_search, search_criteria) # url = conventional url to be scraped
   xpath <- '//a[contains(@href, "searchPage=")]'; # xpath = criteria to look for in the html: the pagination link
   output_names <- c('input_url', 'output_url'); # output_names = returning table headings
@@ -210,7 +210,7 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 
   # parsing the input
 
-  url_parsed <- ojsr::process_urls(input_url)
+  url_parsed <- process_urls(input_url)
 
   # url = conventional url to be scrapped
 
@@ -314,7 +314,7 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
     if (!is.na(url[i])) {
 
       if (verbose) { message("pre-processing url ", url[i]) }
-      process_url <- ojsr::process_urls(url[i])
+      process_url <- process_urls(url[i])
       oai_base_url <- process_url$conventional_oai[1]
       article_id <- process_url$article_id[1]
       identify_url <- paste0(oai_base_url, "/?verb=Identify")
@@ -427,7 +427,7 @@ ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, o
           ) %>% unique()
 
           # parsing the scrapped links
-          parsed_links <- dplyr::left_join( scrapped_links, ojsr::process_urls(scrapped_links$input_url) , by="input_url" )
+          parsed_links <- dplyr::left_join( scrapped_links, process_urls(scrapped_links$input_url) , by="input_url" )
 
           # returning the conventional form for the scrapped links
           conventional_links <- switch( from,
