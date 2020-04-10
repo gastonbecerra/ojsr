@@ -3,7 +3,7 @@
 #' Takes a vector of urls and parses them according to OJS routing conventions, then retrieves OJS base url.
 #'
 #' @param input_url Character vector.
-#' @return A long-format dataframe with the url you provided (input_url) and the parsed OJS base url (output_url)
+#' @return A vector of the same length of your input.
 #'
 #' @examples
 #'
@@ -17,7 +17,7 @@
 #' @export
 parse_base_url <- function ( input_url ) {
   url_parsed <- process_urls(input_url)
-  df <- url_parsed %>% dplyr::select(input_url = input_url, output_url = base_url)
+  df <- url_parsed %>% dplyr::select(base_url) %>% unlist(use.names = FALSE)
   return(df)
 }
 
@@ -27,7 +27,7 @@ parse_base_url <- function ( input_url ) {
 #' Takes a vector of urls and parses them according to OJS routing conventions, then retrieves OAI entry url.
 #'
 #' @param input_url Character vector.
-#' @return A long-format dataframe with the url you provided (input_url) and the parsed OAI entry url (output_url)
+#' @return A vector of the same length of your input.
 #'
 #' @examples
 #'
@@ -41,7 +41,7 @@ parse_base_url <- function ( input_url ) {
 #' @export
 parse_oai_url <- function ( input_url ) {
   url_parsed <- process_urls(input_url)
-  df <- url_parsed %>% dplyr::select(input_url = input_url, output_url = conventional_oai)
+  df <- url_parsed %>% dplyr::select(conventional_oai) %>% unlist(use.names = FALSE)
   return(df)
 }
 

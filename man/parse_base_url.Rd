@@ -10,7 +10,7 @@ parse_base_url(input_url)
 \item{input_url}{Character vector.}
 }
 \value{
-A long-format dataframe with the url you provided (input_url) and the parsed OJS base url (output_url)
+A vector of the same length of your input.
 }
 \description{
 Takes a vector of urls and parses them according to OJS routing conventions, then retrieves OJS base url.

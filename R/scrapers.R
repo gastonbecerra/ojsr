@@ -61,11 +61,11 @@ get_articles_from_issue <- function ( input_url , verbose = FALSE ) {
 #' @param verbose Logical.
 #' @return A long-format dataframe with the url you provided (input_url), the articles url scrapped (output_url),
 #' the format of the galley (format), and the url that forces download of the galley (download_url)
+#'
 #' @examples
 #'
 #' articles <- c(
 #'   'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657',
-#'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137',
 #'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
 #' )
 #' galleys <- ojsr::get_galleys_from_article(input_url = articles,verbose = TRUE)
@@ -91,6 +91,7 @@ get_galleys_from_article <- function ( input_url , verbose = FALSE ) {
 #' @param search_criteria Character string
 #' @param verbose Logical.
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
+#'
 #' @examples
 #'
 #' journals <- c(
@@ -107,7 +108,7 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
   # basic validation
   if ( missing(search_criteria) | trimws(search_criteria) == "" | !is.character(search_criteria) | length(search_criteria) > 1 ) { stop("search criteria must be a non-empty character string", call. = FALSE) }
   if ( missing(input_url) | !is.character(input_url) ) { stop("url must be a character string/vector. maybe introduced a dataframe and forgot to point a column?", call. = FALSE) }
-  if ( missing(verbose) | !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
+  if ( !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
 
   search_criteria <- gsub(pattern = " ", replacement = "+", x = search_criteria)
 
@@ -188,6 +189,7 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
 #' @return A long-format dataframe with the url you provided (input_url), the name of the metadata (meta_data_name),
 #' the content of the metadata (meta_data_content), the standard in which the content is annotated (meta_data_scheme),
 #' and the language in which the metadata was entered (meta_data_xmllang)
+#'
 #' @examples
 #'
 #' articles <- c(
@@ -204,7 +206,7 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
   # basic validation
 
   if ( missing(input_url) | !is.character(input_url) ) { stop("url must be a character string/vector. maybe introduced a dataframe and forgot to point a column?", call. = FALSE) }
-  if ( missing(verbose) | !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
+  if ( !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
 
   df <- data.frame() # object to collect
 
@@ -283,6 +285,7 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 #' @param verbose Logical.
 #' @return A long-format dataframe with the url you provided (input_url), the name of the metadata (meta_data_name),
 #' and the content of the metadata (meta_data_content).
+#'
 #' @examples
 #'
 #' articles <- c(
@@ -387,8 +390,8 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
 ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, output_names ) {
 
   # basic validation
-  if ( missing(input_url) | !is.character(input_url) ) { stop("url must be a character string/vector", call. = FALSE) }
-  if ( missing(verbose) | !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
+  if (missing(input_url) | !is.character(input_url) ) { stop("url must be a character string/vector", call. = FALSE) }
+  if (!is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
   if (length(url) < 1){ stop("empty url vector to scrap. aborting", call. = FALSE) }
 
   df <- data.frame() # object to collect

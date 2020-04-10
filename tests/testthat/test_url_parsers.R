@@ -11,7 +11,7 @@ ojs_base_url <- ojsr::parse_base_url(input_url = url_sample_test)
 ojs_oai_url <- ojsr::parse_oai_url(input_url = url_sample_test)
 
 test_that("result is a dataframe with the same number of rows as the input", {
-  expect_is(ojs_base_url,"data.frame")
-  expect_equal(length(url_sample_test), nrow(ojs_base_url))
-  expect_equal(length(url_sample_test), nrow(ojs_oai_url))
+  expect_is(ojs_base_url,"character")
+  expect_equal(length(url_sample_test), length(ojs_base_url))
+  expect_equal(length(url_sample_test), length(ojs_oai_url))
 })

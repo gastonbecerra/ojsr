@@ -26,7 +26,7 @@ The aim of this package is to aid you in crawling OJS archives, issues, articles
 **Important Notes:**
 
 - **ojsr functions rely on OJS routing conventions** (<https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>), therefore, it is most likely to fail on OJS installments with customized routing. 
-- **ojsr get_\*_from_\* functions do not scrap the url you provide!**. ojsr will parse the urls you input to generate the *right* url to scrap in each scenario (e.g., the issue ToC url, if you are scrapping articles from an issue).
+- **ojsr get_\*_from_\* functions do not scrap the url you provide!**. ojsr will parse the urls you input to compose the *right* url for each scraping scenario (e.g., if you are scrapping articles from an issue, it will compose the url for the issue's ToC).
 
 ## About OJS
 
@@ -50,28 +50,108 @@ So, why ojsr? According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>, as of 
 
 # Use cases
 
-xxxxx
+In these examples we'll use dplyr and ggplot (tidyverse), widyr, igraph, ggraph.
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse) # example 1 and 2
+library(widyr) # example 2
+library(igraph) # example 2
+library(ggraph) # example 2
+library(ojsr)
+```
+
+## Example 1: Scrap complete journals to compare their most common keywords
+
+Let's say we want to scrap metadata from a collection of journals, in order to compare them. We have their names and urls, and can use ojsr to scrap their issues, articles and metadata.
+
+```{r}
+journals <- data.frame ( cbind(
+    name = c( 
+      "Revista Evaluar",
+      "PSocial"
+      ),
+    url = c(
+      "https://revistas.unc.edu.ar/index.php/revaluar",
+      "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial"
+      )
+  ), stringsAsFactors = FALSE
+)
+
+# we are using the journal url as input to retrieve the issues
+issues <- ojsr::get_issues_from_archive(input_url = journals$url) 
+
+# we are using the issues url we just scrapped as the input to retrieve the articles
+articles <- ojsr::get_articles_from_issue(input_url = issues$output_url)
+
+# we are using the articles url we just scrapped as the input to retrieve the metadata
+metadata <- ojsr::get_html_meta_from_article(input_url = articles$output_url)
+```
+
+Before doing some analysis, let's bind these together to have a better understanding of our journals. Since we are interested in summarizing by journal, we can use `ojsr::parse_base_url()` to include this data in the dataframes we just created. (We could skip this on both journals and issues, but we'll do it anyway to keep a consistent table layout). We are also interested in showing how many keywords (a specific metadata) they have, and the keyword / article ratio (useful to discover if keywords are not well served).
+
+```{r}
+# we are including the base_url on each table to latter join 
+journals$base_url <- ojsr::parse_base_url(journals$url)
+issues$base_url <- ojsr::parse_base_url(issues$input_url)
+articles$base_url <- ojsr::parse_base_url(articles$input_url)
+metadata$base_url <- ojsr::parse_base_url(metadata$input_url)
+
+# a journal / issue / articles/ metadata / keywords / keywords/article table
+sample <- journals %>%
+  left_join( issues %>% group_by( base_url ) %>% summarise(n_issues=n()) , by="base_url") %>%
+  left_join( articles %>% group_by( base_url ) %>% summarise(n_articles=n()) , by="base_url") %>%
+  left_join( metadata %>% group_by( base_url ) %>% summarise(n_metadata=n()) , by="base_url") %>%
+  left_join( metadata %>% filter(meta_data_name=="citation_keywords") %>% group_by( base_url ) %>% summarise(n_keywords=n()) , by="base_url") %>%
+  mutate( key_art = n_keywords/n_articles ) %>%
+  select(name, n_issues, n_articles, n_metadata, n_keywords, key_art)
+sample
+```
+
+Now we can do our analysis: exploring the main keywords per journal. For this, we are first keeping only non-empty keywords metadata in spanish; then we are calculating the 3 most frequent keywords (usually you should first clean them); finally we are ploting them by journal
+
+```{r fig.height=3, fig.width=6}
+metadata %>% filter(meta_data_name=="citation_keywords", meta_data_xmllang=="es") %>% # filtering keywords
+ group_by(base_url, keyword = meta_data_content) %>% tally(sort=TRUE) %>% top_n(wt = n, n = 3) %>% # 3 most frequent keywords by journal
+  left_join( journals , by="base_url") %>%
+  ggplot(aes(x=reorder(keyword,n),y=n)) + facet_wrap(~name, scales = "free") + geom_bar(stat = "identity") + coord_flip()
+
+```
+
+
+## Example 2: Scraping articles' metadata based on a search query to analyze keyword correlations
+
+Let's say we want to analize papers of a particular subject (e.g., personality, in Spanish: personalidad), by doing a search within a collection of journals. We have the journals urls, and we'll use ojsr's `get_articles_from_search` to compose the search query and browse through results to retrieve the articles' urls. Then, we can scrap their metadata.
+
+```{r}
+journals <- c( # psychology and social psychology journals 
+      "https://dspace.palermo.edu/ojs/index.php/psicodebate",
+      "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial",
+      "https://revistapsicologia.uchile.cl/index.php/RDP/")
+criteria <- "personalidad"
+articles <- ojsr::get_articles_from_search(input_url = journals, search_criteria = criteria)
+metadata <- ojsr::get_html_meta_from_article(input_url = articles$output_url)
+```
+
+Now we can do our analysis. First, we create a table keeping only articles and keywords. We'll use **widyr** to analyze keywords correlations on the article level. We'll then use **ggraph** to show them in a network graph.
+
+```{r fig.height=3, fig.width=6}
+keywords <- metadata %>% filter(meta_data_name=="citation_keywords", meta_data_xmllang=="es", meta_data_content != "") %>% # filtering keywords
+  select(article = input_url, keyword = meta_data_content) %>% # keep only article url and keyword content
+  mutate(keyword=trimws(tolower(keyword))) %>% # quick normalization
+  group_by(keyword) %>% filter(n() > 1) %>% ungroup() # finally, let's keep only keywords that appear more than once
+keyword_corr <- keywords %>% pairwise_cor(item = keyword, feature = article, sort = TRUE, method = "pearson") # calculate correlations
+keyword_corr %>% # let's chart
+  filter(correlation > .1) %>%
+  graph_from_data_frame() %>%
+  ggraph(layout = "fr") +
+  geom_edge_link(aes(alpha=correlation, width=2), show.legend = FALSE) +
+  geom_node_point(size = 5) +
+  geom_node_text(aes(label = name), repel = TRUE) +
+  theme_void()
+```
 
 
 # Function reference
-
-## parse_base_url: Parses urls against OJS routing conventions to retrieve the base url
-
-`parse_base_url()` takes a vector of OJS urls and retrieves their base url, according to OJS routing conventions.
-
-```{r}
-mix_links <- c(
-   'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
-   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
-)
-base_url <- ojsr::parse_base_url(input_url = mix_links)
-```
-
-Result is in a dataframe of the same length of your input:
-
-1. *input_url* - the url you provided
-2. *output_url* - the base url parsed
-
 
 ## get_issues_from_archive: Scraps issues' urls from OJS issue archive
 
@@ -85,7 +165,7 @@ journals <- c(
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive', # issue archive
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903' # article
 )
-issues <- ojsr::get_issues_from_archive(input_url = journals, verbose = TRUE)
+issues <- ojsr::get_issues_from_archive(input_url = journals)
 ```
 
 Result is in a long-format dataframe (1 input_url may result in several rows, one for each output_url), containing:
@@ -104,7 +184,7 @@ issues <- c(
   'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65', # issue including ToC
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31' # no ToC nor links
 )
-articles <- ojsr::get_articles_from_issue(input_url = issues, verbose = TRUE) 
+articles <- ojsr::get_articles_from_issue(input_url = issues) 
 ```
 
 Result is in a long-format dataframe (1 input_url may result in several rows, one for each output_url), containing:
@@ -125,16 +205,13 @@ journals <- c(
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current' 
 )
 criteria <- "psicologia"
-articles_searched <- ojsr::get_articles_from_search(input_url = journals, 
-  search_criteria = criteria, verbose = TRUE)
+articles_search <- ojsr::get_articles_from_search(input_url = journals, search_criteria = criteria)
 ```
 
 Result is in a long-format dataframe (1 input_url may result in several rows, one for each output_url), containing:
 
 1. *input_url* - the url you provided
 2. *output_url* - the article url
-
-
 
 ## get_galleys_from_article: Scrap galleys urls from OJS articles
 
@@ -147,10 +224,9 @@ You may provide any article-level url (article abstract view, inline view, pdf d
 ```{r}
 articles <- c( 
   'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657', # galleys pdf and mp3
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # pdf
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # inline reader
 )
-galleys <- ojsr::get_galleys_from_article(input_url = articles,verbose = TRUE) 
+galleys <- ojsr::get_galleys_from_article(input_url = articles) 
 ```
 
 Result is in a long-format dataframe (1 input_url may result in several rows, one for each output_url), containing:
@@ -159,8 +235,6 @@ Result is in a long-format dataframe (1 input_url may result in several rows, on
 2. *output_url* - the galleys url scraped
 3. *format* - the format of the galley (e.g., pdf, xml)
 4. *download_url* - the conventional url to force download of the galley. You may pass these to a download function of your own (e.g., <https://stackoverflow.com/questions/39246739/download-multiple-files-using-download-file-function>).
-
-
 
 ## get_html_meta_from_article: Scrap metadata from html of OJS articles
 
@@ -173,7 +247,7 @@ articles <- c(
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
 )
-metadata <- ojsr::get_html_meta_from_article(articles, verbose = TRUE) 
+metadata <- ojsr::get_html_meta_from_article(input_url = articles) 
 ```
 
 Result is in a long-format dataframe (1 inputUrl may result in several rows, one for each outputUrl), containing:
@@ -183,8 +257,6 @@ Result is in a long-format dataframe (1 inputUrl may result in several rows, one
 3. *meta_data_content* - the actual value of the metatag
 4. *meta_data_scheme* - the standard in which the content is annotated
 5. *meta_data_xmllang* - the language in which the metadata was entered
-
-
 
 ## get_oai_meta_from_article: Retrieve OAI records for OJS articles
 
@@ -197,7 +269,7 @@ articles <- c(
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
 )
-metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles, verbose = TRUE)
+metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles)
 ```
 
 Result is in a long-format dataframe (1 inputUrl may result in several rows, one for each outputUrl), containing:
@@ -210,6 +282,19 @@ Result is in a long-format dataframe (1 inputUrl may result in several rows, one
 
 **Note: This function is in a very preliminar stage**. If you are interested in working with OAI records, you may want to check Scott Chamberlain's **OAI package for R** <https://CRAN.R-project.org/package=oai>. If you only have the OJS home url, and would like to check all the article's OAI records at one shot, an interesting option is to parse it with `ojsr::parse_oai_url()` and passing the output_url to `oai::list_identifiers()`.
 
+## parse_base_url: Parses urls against OJS routing conventions to retrieve the base url
+
+`parse_base_url()` takes a vector of OJS urls and retrieves their base url, according to OJS routing conventions.
+
+```{r}
+mix_links <- c(
+   'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
+   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
+)
+base_url <- ojsr::parse_base_url(input_url = mix_links)
+```
+
+Result is a vector of the same length of your input.
 
 ## parse_oai_url: Parses urls against OJS routing conventions to retrieve the OAI protocol url
 
@@ -223,7 +308,4 @@ mix_links <- c(
 oai_url <- ojsr::parse_oai_url(input_url = mix_links)
 ```
 
-Result is in a dataframe of the same length of your input:
-
-1. *input_url* - the url you provided
-2. *output_url* - the base url parsed
+Result is a vector of the same length of your input.

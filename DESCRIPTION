@@ -4,7 +4,7 @@ Title: OJS scraper for R
 Version: 0.1.0
 Authors@R: person("Gaston", "Becerra", email = "gaston.becerra@gmail.com",
   role = c("aut", "cre"))
-Description: This package allows you to crawl OJS pages and retrieve meta-data from articles. 
+Description: This tool allows you to crawl OJS pages and retrieve meta-data from articles. 
     You can crawl OJS archives, issues, articles, galleys, and search results. 
     You can scrap articles meta-data from their head tag in html, or from OAI records.
     Most of ojsr functiones rely on OJS routing conventions 
@@ -27,6 +27,10 @@ Imports:
 Suggests: 
     knitr,
     rmarkdown,
-    testthat
+    testthat,
+    ggraph,
+    igraph,
+    tidyverse,
+    widyr
 VignetteBuilder: knitr
 RoxygenNote: 7.1.0
