@@ -14,10 +14,11 @@
 #' base_url <- ojsr::parse_base_url(input_url = mix_links)
 #'
 #' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #' @export
 parse_base_url <- function ( input_url ) {
   url_parsed <- process_urls(input_url)
-  df <- url_parsed %>% dplyr::select(base_url) %>% unlist(use.names = FALSE)
+  df <- url_parsed %>% dplyr::select(.data$base_url) %>% unlist(use.names = FALSE)
   return(df)
 }
 
@@ -38,10 +39,11 @@ parse_base_url <- function ( input_url ) {
 #' oai_url <- ojsr::parse_oai_url(input_url = mix_links)
 #'
 #' @importFrom magrittr %>%
+#' @importFrom rlang .data
 #' @export
 parse_oai_url <- function ( input_url ) {
   url_parsed <- process_urls(input_url)
-  df <- url_parsed %>% dplyr::select(conventional_oai) %>% unlist(use.names = FALSE)
+  df <- url_parsed %>% dplyr::select(.data$conventional_oai) %>% unlist(use.names = FALSE)
   return(df)
 }
 

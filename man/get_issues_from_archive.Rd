@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_issues_from_archive}
 \alias{get_issues_from_archive}
-\title{Scraps an OJS archive of issues and retrieves the issues' url}
+\title{Scraps an OJS issues archive and retrieves the issues' url}
 \usage{
 get_issues_from_archive(input_url, verbose = FALSE)
 }

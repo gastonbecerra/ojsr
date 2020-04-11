@@ -21,12 +21,12 @@ library(knitr)
 
 # Overview
 
-The aim of this package is to aid you in crawling OJS archives, issues, articles, galleys, and search results, and retrieving/scraping meta-data from articles.
+ojsr allows you to crawl OJS archives, issues, articles, galleys, and search results, and retrieve meta-data from articles.
 
 **Important Notes:**
 
-- **ojsr functions rely on OJS routing conventions** (<https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>), therefore, it is most likely to fail on OJS installments with customized routing. 
-- **ojsr get_\*_from_\* functions do not scrap the url you provide!**. ojsr will parse the urls you input to compose the *right* url for each scraping scenario (e.g., if you are scrapping articles from an issue, it will compose the url for the issue's ToC).
+- **ojsr functions rely on OJS routing conventions**, therefore, it is most likely to fail on OJS installments with customized routing  (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>);
+- **ojsr do not scrap the url you provide!**. ojsr composes the required url for different scrapping scenarios (e.g., if you are scrapping articles from an issue, it will parse and browse the issue's ToC).
 
 ## About OJS
 
@@ -38,40 +38,34 @@ OJS assists with every stage of the refereed publishing process, from submission
 
 OJS is open source software made freely available to journals worldwide for the purpose of making open access publishing a viable option for more journals, as open access can increase a journal’s readership as well as its contribution to the public good on a global scale (see PKP Publications).
 
-## OJS v3 and OJS API
+## OJS API
 
 Since OJS v3.1+ <https://docs.pkp.sfu.ca/dev/api/ojs/3.1> a Rest API is provided. We're positive a better R interface should use that API instead of webscraping. 
 
 So, why ojsr? According to <https://pkp.sfu.ca/ojs/ojs-usage/ojs-stats/>, as of 2019 (when v3.1+ was launched), OJS was being used by at least 10,000 journals worldwide. OJS is an excellent free publishing solution for institutions that probably could not publish otherwise, and presumably, can not afford to update constantly. ojsr aims to help crawling and retrieving info from OJS during this legacy period.
 
 
+# Example
 
-
-
-# Use cases
-
-In these examples we'll use dplyr and ggplot (tidyverse), widyr, igraph, ggraph.
-
-```{r message=FALSE, warning=FALSE}
-library(tidyverse) # example 1 and 2
-library(widyr) # example 2
-library(igraph) # example 2
-library(ggraph) # example 2
-library(ojsr)
-```
-
-## Example 1: Scrap complete journals to compare their most common keywords
+## Scrap complete journals to compare their most common keywords
 
 Let's say we want to scrap metadata from a collection of journals, in order to compare them. We have their names and urls, and can use ojsr to scrap their issues, articles and metadata.
 
-```{r}
+```{r message=FALSE, warning=FALSE}
+# first, load the library
+library(ojsr)
+
+# we'll use dplyr and ggplot on this example
+library(tidyverse)
+
+# our collection of journals
 journals <- data.frame ( cbind(
     name = c( 
       "Revista Evaluar",
       "PSocial"
       ),
     url = c(
-      "https://revistas.unc.edu.ar/index.php/revaluar",
+      "https://revistas.unc.edu.ar/index.php/revaluar/issue/view/2008",
       "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial"
       )
   ), stringsAsFactors = FALSE
@@ -87,67 +81,33 @@ articles <- ojsr::get_articles_from_issue(input_url = issues$output_url)
 metadata <- ojsr::get_html_meta_from_article(input_url = articles$output_url)
 ```
 
-Before doing some analysis, let's bind these together to have a better understanding of our journals. Since we are interested in summarizing by journal, we can use `ojsr::parse_base_url()` to include this data in the dataframes we just created. (We could skip this on both journals and issues, but we'll do it anyway to keep a consistent table layout). We are also interested in showing how many keywords (a specific metadata) they have, and the keyword / article ratio (useful to discover if keywords are not well served).
+Before doing some analysis, let's bind these together to have a better understanding of our journals. Since we are interested in summarizing by journal, we can use `ojsr::parse_base_url()` on our tables to have a binding value. 
 
 ```{r}
-# we are including the base_url on each table to latter join 
+# we are including the base_url on each table to simplify joining
 journals$base_url <- ojsr::parse_base_url(journals$url)
 issues$base_url <- ojsr::parse_base_url(issues$input_url)
 articles$base_url <- ojsr::parse_base_url(articles$input_url)
 metadata$base_url <- ojsr::parse_base_url(metadata$input_url)
 
 # a journal / issue / articles/ metadata / keywords / keywords/article table
-sample <- journals %>%
+journals %>%
   left_join( issues %>% group_by( base_url ) %>% summarise(n_issues=n()) , by="base_url") %>%
   left_join( articles %>% group_by( base_url ) %>% summarise(n_articles=n()) , by="base_url") %>%
   left_join( metadata %>% group_by( base_url ) %>% summarise(n_metadata=n()) , by="base_url") %>%
   left_join( metadata %>% filter(meta_data_name=="citation_keywords") %>% group_by( base_url ) %>% summarise(n_keywords=n()) , by="base_url") %>%
   mutate( key_art = n_keywords/n_articles ) %>%
   select(name, n_issues, n_articles, n_metadata, n_keywords, key_art)
-sample
+
 ```
 
-Now we can do our analysis: exploring the main keywords per journal. For this, we are first keeping only non-empty keywords metadata in spanish; then we are calculating the 3 most frequent keywords (usually you should first clean them); finally we are ploting them by journal
+Now, we can do our analysis: exploring the main keywords per journal. For this, we are first keeping only non-empty keywords metadata in spanish; then, we are calculating the 3 most frequent keywords (usually you should first clean them); finally we are ploting them by journal
 
-```{r fig.height=3, fig.width=6}
+```{r fig.height=3, fig.width=7}
 metadata %>% filter(meta_data_name=="citation_keywords", meta_data_xmllang=="es") %>% # filtering keywords
- group_by(base_url, keyword = meta_data_content) %>% tally(sort=TRUE) %>% top_n(wt = n, n = 3) %>% # 3 most frequent keywords by journal
-  left_join( journals , by="base_url") %>%
+  group_by(base_url, keyword = meta_data_content) %>% tally(sort=TRUE) %>% top_n(wt = n, n = 3) %>% # 3 most frequent keywords by journal
+  left_join( journals , by="base_url") %>% # let's include the journal names
   ggplot(aes(x=reorder(keyword,n),y=n)) + facet_wrap(~name, scales = "free") + geom_bar(stat = "identity") + coord_flip()
-
-```
-
-
-## Example 2: Scraping articles' metadata based on a search query to analyze keyword correlations
-
-Let's say we want to analize papers of a particular subject (e.g., personality, in Spanish: personalidad), by doing a search within a collection of journals. We have the journals urls, and we'll use ojsr's `get_articles_from_search` to compose the search query and browse through results to retrieve the articles' urls. Then, we can scrap their metadata.
-
-```{r}
-journals <- c( # psychology and social psychology journals 
-      "https://dspace.palermo.edu/ojs/index.php/psicodebate",
-      "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial",
-      "https://revistapsicologia.uchile.cl/index.php/RDP/")
-criteria <- "personalidad"
-articles <- ojsr::get_articles_from_search(input_url = journals, search_criteria = criteria)
-metadata <- ojsr::get_html_meta_from_article(input_url = articles$output_url)
-```
-
-Now we can do our analysis. First, we create a table keeping only articles and keywords. We'll use **widyr** to analyze keywords correlations on the article level. We'll then use **ggraph** to show them in a network graph.
-
-```{r fig.height=3, fig.width=6}
-keywords <- metadata %>% filter(meta_data_name=="citation_keywords", meta_data_xmllang=="es", meta_data_content != "") %>% # filtering keywords
-  select(article = input_url, keyword = meta_data_content) %>% # keep only article url and keyword content
-  mutate(keyword=trimws(tolower(keyword))) %>% # quick normalization
-  group_by(keyword) %>% filter(n() > 1) %>% ungroup() # finally, let's keep only keywords that appear more than once
-keyword_corr <- keywords %>% pairwise_cor(item = keyword, feature = article, sort = TRUE, method = "pearson") # calculate correlations
-keyword_corr %>% # let's chart
-  filter(correlation > .1) %>%
-  graph_from_data_frame() %>%
-  ggraph(layout = "fr") +
-  geom_edge_link(aes(alpha=correlation, width=2), show.legend = FALSE) +
-  geom_node_point(size = 5) +
-  geom_node_text(aes(label = name), repel = TRUE) +
-  theme_void()
 ```
 
 

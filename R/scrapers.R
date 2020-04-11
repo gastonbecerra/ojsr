@@ -1,4 +1,4 @@
-#' Scraps an OJS archive of issues and retrieves the issues' url
+#' Scraps an OJS issues archive and retrieves the issues' url
 #'
 #' Takes a vector of OJS urls and scraps their archive of issues to retrieve links to OJS issues.
 #'
@@ -71,7 +71,6 @@ get_articles_from_issue <- function ( input_url , verbose = FALSE ) {
 #' galleys <- ojsr::get_galleys_from_article(input_url = articles,verbose = TRUE)
 #'
 #' @export
-#'
 get_galleys_from_article <- function ( input_url , verbose = FALSE ) {
   url_parsed <- process_urls(input_url)
   xpath <- '//a[contains(@href, "/article/view/")]'
@@ -200,7 +199,6 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
 #'
 #' @importFrom magrittr %>%
 #' @export
-#'
 get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 
   # basic validation
@@ -296,7 +294,6 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 #'
 #' @importFrom magrittr %>%
 #' @export
-#'
 get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
 
   url <- input_url
@@ -387,6 +384,7 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
 
 
 #' @importFrom magrittr %>%
+#' @importFrom rlang .data
 ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, output_names ) {
 
   # basic validation
@@ -434,8 +432,8 @@ ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, o
 
           # returning the conventional form for the scrapped links
           conventional_links <- switch( from,
-            get_issue_url = { parsed_links %>% dplyr::filter( !is.na(issue_id) ) %>% dplyr::select(conventional_issue) %>% unlist() %>% unique() },
-            get_article_url = { parsed_links %>% dplyr::filter( !is.na(article_id), is.na(galley_id) ) %>% dplyr::select(conventional_article) %>% unlist() %>% unique() },
+            get_issue_url = { parsed_links %>% dplyr::filter( !is.na(.data$issue_id) ) %>% dplyr::select(.data$conventional_issue) %>% unlist() %>% unique() },
+            get_article_url = { parsed_links %>% dplyr::filter( !is.na(.data$article_id), is.na(.data$galley_id) ) %>% dplyr::select(.data$conventional_article) %>% unlist() %>% unique() },
             get_galley_url = NA, # we need more than 1 variable; we do this in the next block
           )
 
@@ -450,7 +448,7 @@ ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, o
 
           ## if galley, preparing a second vector with formats
           if (from=="get_galley_url") {
-            galley_links <- parsed_links %>% dplyr::filter(!is.na(article_id), !is.na(galley_id), galley_id != "0" ) %>% dplyr::select(input_url, format) %>% unique()
+            galley_links <- parsed_links %>% dplyr::filter(!is.na(.data$article_id), !is.na(.data$galley_id), .data$galley_id != "0" ) %>% dplyr::select(input_url, format) %>% unique()
             if(nrow(galley_links)>0){
               conventional_links <- galley_links$input_url %>% as.character()
               links_formats <- galley_links$format %>% as.character()

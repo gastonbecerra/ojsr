@@ -22,7 +22,6 @@ Takes a vector of OJS urls and scraps them to retrieve links to OJS galleys
 
 articles <- c(
   'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657',
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137',
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
 )
 galleys <- ojsr::get_galleys_from_article(input_url = articles,verbose = TRUE)
