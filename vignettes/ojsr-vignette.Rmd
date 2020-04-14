@@ -61,12 +61,12 @@ library(tidyverse)
 # our collection of journals
 journals <- data.frame ( cbind(
     name = c( 
-      "Revista Evaluar",
-      "PSocial"
+      "PSocial",
+      "Odisea"
       ),
     url = c(
-      "https://revistas.unc.edu.ar/index.php/revaluar/issue/view/2008",
-      "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial"
+      "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial",
+      "https://publicaciones.sociales.uba.ar/index.php/odisea"
       )
   ), stringsAsFactors = FALSE
 )

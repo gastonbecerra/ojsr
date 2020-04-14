@@ -21,7 +21,7 @@ Takes a vector of OJS urls, process them to create search result pages (includin
 and scraps them to retrieve links to OJS articles
 }
 \examples{
-
+\donttest{
 journals <- c(
    'https://revistapsicologia.uchile.cl/index.php/RDP/',
    'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/'
@@ -29,5 +29,5 @@ journals <- c(
 criteria <- "actitudes"
 search_result_pages <- ojsr::get_articles_from_search(input_url = journals,
     search_criteria = criteria, verbose = TRUE)
-
+}
 }

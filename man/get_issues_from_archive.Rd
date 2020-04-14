@@ -18,11 +18,12 @@ A long-format dataframe with the url you provided (input_url) and the url of iss
 Takes a vector of OJS urls and scraps their archive of issues to retrieve links to OJS issues.
 }
 \examples{
-
+\donttest{
 journals <- c(
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
 )
 issues <- ojsr::get_issues_from_archive(input_url = journals, verbose = TRUE)
+}
 
 }

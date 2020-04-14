@@ -18,11 +18,11 @@ A long-format dataframe with the url you provided (input_url) and the articles u
 Takes a vector of OJS urls and scraps them to retrieve links to OJS articles
 }
 \examples{
-
+\donttest{
 issues <- c(
    'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65',
    'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31'
 )
 articles <- ojsr::get_articles_from_issue(input_url = issues, verbose = TRUE)
-
+}
 }

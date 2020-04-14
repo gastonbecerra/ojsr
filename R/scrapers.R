@@ -7,12 +7,13 @@
 #' @return A long-format dataframe with the url you provided (input_url) and the url of issues found (output_url)
 #'
 #' @examples
-#'
+#' \donttest{
 #' journals <- c(
 #'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
 #'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
 #' )
 #' issues <- ojsr::get_issues_from_archive(input_url = journals, verbose = TRUE)
+#' }
 #'
 #' @export
 get_issues_from_archive <- function ( input_url , verbose = FALSE ) {
@@ -34,13 +35,13 @@ get_issues_from_archive <- function ( input_url , verbose = FALSE ) {
 #' @return A long-format dataframe with the url you provided (input_url) and the articles url scrapped (output_url)
 #'
 #' @examples
-#'
+#' \donttest{
 #' issues <- c(
 #'    'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65',
 #'    'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31'
 #' )
 #' articles <- ojsr::get_articles_from_issue(input_url = issues, verbose = TRUE)
-#'
+#' }
 #' @export
 #'
 get_articles_from_issue <- function ( input_url , verbose = FALSE ) {
@@ -63,13 +64,13 @@ get_articles_from_issue <- function ( input_url , verbose = FALSE ) {
 #' the format of the galley (format), and the url that forces download of the galley (download_url)
 #'
 #' @examples
-#'
+#' \donttest{
 #' articles <- c(
 #'   'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657',
 #'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
 #' )
 #' galleys <- ojsr::get_galleys_from_article(input_url = articles,verbose = TRUE)
-#'
+#' }
 #' @export
 get_galleys_from_article <- function ( input_url , verbose = FALSE ) {
   url_parsed <- process_urls(input_url)
@@ -92,7 +93,7 @@ get_galleys_from_article <- function ( input_url , verbose = FALSE ) {
 #' @return A dataframe with the urls of the articles linked from the OJS issue page.
 #'
 #' @examples
-#'
+#' \donttest{
 #' journals <- c(
 #'    'https://revistapsicologia.uchile.cl/index.php/RDP/',
 #'    'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/'
@@ -100,7 +101,7 @@ get_galleys_from_article <- function ( input_url , verbose = FALSE ) {
 #' criteria <- "actitudes"
 #' search_result_pages <- ojsr::get_articles_from_search(input_url = journals,
 #'     search_criteria = criteria, verbose = TRUE)
-#'
+#' }
 #' @export
 get_articles_from_search <- function ( input_url , search_criteria, verbose = FALSE) {
 
@@ -190,13 +191,13 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
 #' and the language in which the metadata was entered (meta_data_xmllang)
 #'
 #' @examples
-#'
+#' \donttest{
 #' articles <- c(
 #'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
 #'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
 #' )
 #' metadata <- ojsr::get_html_meta_from_article(articles, verbose = TRUE)
-#'
+#' }
 #' @importFrom magrittr %>%
 #' @export
 get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
@@ -285,13 +286,13 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 #' and the content of the metadata (meta_data_content).
 #'
 #' @examples
-#'
+#' \donttest{
 #' articles <- c(
 #'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
 #'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
 #' )
 #' metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles, verbose = TRUE)
-#'
+#' }
 #' @importFrom magrittr %>%
 #' @export
 get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
