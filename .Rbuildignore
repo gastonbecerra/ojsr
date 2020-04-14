@@ -3,3 +3,4 @@
 ^\draft\$
 cran-comments.md
 ^\.travis\.yml$
+^CRAN-RELEASE$

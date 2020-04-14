@@ -101,7 +101,7 @@ journals %>%
 
 ```
 
-Now, we can do our analysis: exploring the main keywords per journal. For this, we are first keeping only non-empty keywords metadata in spanish; then, we are calculating the 3 most frequent keywords (usually you should first clean them); finally we are ploting them by journal
+Now, we can do our analysis: exploring the main keywords per journal. For this, we keep only non-empty keywords metadata in Spanish; then, we pick the 3 most frequent keywords (normally you would do some cleanup and normalization first); finally we plot by journal.
 
 ```{r fig.height=3, fig.width=7}
 metadata %>% filter(meta_data_name=="citation_keywords", meta_data_xmllang=="es") %>% # filtering keywords
@@ -220,7 +220,7 @@ Result is in a long-format dataframe (1 inputUrl may result in several rows, one
 
 ## get_oai_meta_from_article: Retrieve OAI records for OJS articles
 
-An alternative to webscraping metadata from the html of article pages is to retrieve their OAI-PMH (Open Archives Initiative Protocol for 'Metadata' Harvesting) records <http://www.openarchives.org/OAI/openarchivesprotocol.html>
+An alternative to web-scraping metadata from the html of article pages is to retrieve their OAI-PMH (Open Archives Initiative Protocol for 'Metadata' Harvesting) records <http://www.openarchives.org/OAI/openarchivesprotocol.html>
 
 `get_oai_meta_from_article()` will try to access the OAI records within the OJS for any article (e.g., <https://fundacionmenteclara.org.ar/revista/index.php/RCA/oai/?verb=GetRecord&identifier=oai:ojs.fundacionmenteclara.org.ar:article/43&metadataPrefix=oai_dc>) for which you provided an url. 
 
@@ -240,7 +240,7 @@ Result is in a long-format dataframe (1 inputUrl may result in several rows, one
 4. *meta_data_scheme* - **always returns NA** (included just for easier binding with `get_html_meta_from_article()` results)
 5. *meta_data_xmllang* - **always returns NA** (included just for easier binding with `get_html_meta_from_article()` results)
 
-**Note: This function is in a very preliminar stage**. If you are interested in working with OAI records, you may want to check Scott Chamberlain's **OAI package for R** <https://CRAN.R-project.org/package=oai>. If you only have the OJS home url, and would like to check all the article's OAI records at one shot, an interesting option is to parse it with `ojsr::parse_oai_url()` and passing the output_url to `oai::list_identifiers()`.
+**Note: This function is in a very preliminary stage**. If you are interested in working with OAI records, you may want to check Scott Chamberlain's **OAI package for R** <https://CRAN.R-project.org/package=oai>. If you only have the OJS home url, and would like to check all the article's OAI records at one shot, an interesting option is to parse it with `ojsr::parse_oai_url()` and passing the output_url to `oai::list_identifiers()`.
 
 ## parse_base_url: Parses urls against OJS routing conventions to retrieve the base url
 
