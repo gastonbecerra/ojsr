@@ -1,5 +1,13 @@
 ## Resubmission
 
+### 20/04/16
+
+Fixed in DESCRIPTION:
+- OJS and OAI acronyms mentioned in undirected single quotes.
+
+AlsO:
+- deleted dev comments in test file
+
 ### 20/04/14
 
 Fixed in DESCRIPTION:

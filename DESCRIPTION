@@ -1,16 +1,16 @@
 Package: ojsr
 Type: Package
-Title: Crawler and Scraper for OJS
+Title: Crawler and Scraper for Open Journal System ('OJS')
 Version: 0.1.0
 Authors@R: person("Gaston", "Becerra", email = "gaston.becerra@gmail.com",
   role = c("aut", "cre"),
   comment = c(ORCID = "0000-0001-9432-8848"))
-Description: Crawler for OJS pages and scraper for meta-data from articles. 
-    You can crawl OJS archives, issues, articles, galleys, and search results. 
-    You can scrap articles meta-data from their head tag in html, or from OAI records.
-    Most of these functions rely on OJS routing conventions 
-    (<https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>), 
-    and are most likely to fail on OJS installments with customized routing.
+Description: Crawler for 'OJS' pages and scraper for meta-data from articles. 
+    You can crawl 'OJS' archives, issues, articles, galleys, and search results. 
+    You can scrap articles meta-data from their head tag in html, 
+    or from Open Archives Initiative ('OAI') records.
+    Most of these functions rely on 'OJS' routing conventions 
+    (<https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>).
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
