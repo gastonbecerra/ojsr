@@ -1,5 +1,5 @@
 ---
-title: 'ojsr: A R package for OJS scraping'
+title: "ojsr: Crawler/scraper for Open Journal System (OJS)"
 tags:
   - R
   - OJS
