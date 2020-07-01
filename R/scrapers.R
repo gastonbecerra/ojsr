@@ -420,6 +420,8 @@ ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, o
 
         if (length(links)>0) {
 
+          # browser()
+
           # create a table for the scrapped links
           scrapped_links <- data.frame(
             cbind(
@@ -434,31 +436,41 @@ ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, o
           # returning the conventional form for the scrapped links
           conventional_links <- switch( from,
             get_issue_url = { parsed_links %>% dplyr::filter( !is.na(.data$issue_id) ) %>% dplyr::select(.data$conventional_issue) %>% unlist() %>% unique() },
-            get_article_url = { parsed_links %>% dplyr::filter( !is.na(.data$article_id), is.na(.data$galley_id) ) %>% dplyr::select(.data$conventional_article) %>% unlist() %>% unique() },
+            get_article_url = { parsed_links %>%
+                dplyr::filter( !is.na(.data$article_id), is.na(.data$galley_id) ) %>%
+                dplyr::select(.data$conventional_article) %>% unlist() %>% unique() },
             get_galley_url = NA, # we need more than 1 variable; we do this in the next block
           )
 
           newdf <- data.frame() # object to return
 
-          # preparing the row to return (usually the input, the conventional (parsed>processed), and etc.)
+          if (nrow(as.data.frame(conventional_links))>0) {
 
-          ## if article or issue, return urls for input + output
-          if (from=="get_issue_url" | from=="get_article_url") {
-            newdf <- data.frame(cbind( input_url[i], conventional_links ), stringsAsFactors = FALSE)
-          }
+            # preparing the row to return (usually the input, the conventional (parsed>processed), and etc.)
 
-          ## if galley, preparing a second vector with formats
-          if (from=="get_galley_url") {
-            galley_links <- parsed_links %>% dplyr::filter(!is.na(.data$article_id), !is.na(.data$galley_id), .data$galley_id != "0" ) %>% dplyr::select(input_url, format) %>% unique()
-            if(nrow(galley_links)>0){
-              conventional_links <- galley_links$input_url %>% as.character()
-              links_formats <- galley_links$format %>% as.character()
-              links_force <- gsub(pattern = "article/view", replacement = "article/download", x = conventional_links, fixed = TRUE)
-              newdf <- data.frame(cbind( input_url[i], conventional_links, links_formats, links_force ), stringsAsFactors = FALSE)
+            ## if article or issue, return urls for input + output
+            if (from=="get_issue_url" | from=="get_article_url") {
+              newdf <- data.frame(cbind( input_url[i], conventional_links ), stringsAsFactors = FALSE)
             }
-          }
 
-          if (verbose ) { message("scrapped links processed; returning ", nrow(newdf), " elements") }
+            ## if galley, preparing a second vector with formats
+            if (from=="get_galley_url") {
+              galley_links <- parsed_links %>% dplyr::filter(!is.na(.data$article_id), !is.na(.data$galley_id), .data$galley_id != "0" ) %>% dplyr::select(input_url, format) %>% unique()
+              if(nrow(galley_links)>0){
+                conventional_links <- galley_links$input_url %>% as.character()
+                links_formats <- galley_links$format %>% as.character()
+                links_force <- gsub(pattern = "article/view", replacement = "article/download", x = conventional_links, fixed = TRUE)
+                newdf <- data.frame(cbind( input_url[i], conventional_links, links_formats, links_force ), stringsAsFactors = FALSE)
+              }
+            }
+
+            if (verbose ) { message("scrapped links processed; returning ", nrow(newdf), " elements") }
+
+          } else {
+
+            message("no articles found on ", substr(url[i],1,15), " (galleys may be present)")
+
+          }
 
           if (nrow(newdf)>0) {
             names(newdf) <- output_names

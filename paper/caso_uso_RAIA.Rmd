@@ -1,0 +1,180 @@
+---
+title: "Caso de uso (paper RAIA)"
+author: "gaston becerra"
+date: "30/6/2020"
+output: html_document
+---
+
+# Instalación
+
+En primer lugar debemos instalar `ojsr`. 
+
+```{r instalacion, eval=FALSE, include=TRUE}
+
+install.packages('ojsr') # instala desde CRAN
+
+```
+
+Luego, lo cargamos en memoria, junto a otros paquetes que necesitemos. 
+Para este ejemplo, usaremos funciones del conjunto de paquetes `tidy`.
+
+```{r librerias, eval=TRUE, message=FALSE, warning=FALSE, include=TRUE}
+
+library('ojsr') # carga el paquete en memoria
+library('tidyverse') # vamos a usar dplyr y ggplot
+library(ggwordcloud)
+```
+
+# 1. Adquisición de datos
+
+Para recuperar contenido, deberemos aportar las URLs de las revistas que nos interesa explorar. Si bien podríamos simplemente pasar un vector, aquí generamos una tabla que incluya los nombres, así podemos utilizarlos en las visualizaciones.
+
+```{r lista de revistas}
+
+revistas <- data.frame(
+  stringsAsFactors = FALSE,
+  url = c(
+          "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial",
+          "https://revistas.unc.edu.ar/index.php/revaluar",
+          "https://dspace.palermo.edu/ojs/index.php/psicodebate",
+          "https://revistas.ucc.edu.co/index.php/pe/about",
+          "https://revistas.javeriana.edu.co/index.php/revPsycho/index/",
+          "https://revistas.unbosque.edu.co/index.php/CHP/" ),
+  nombre = c(
+             "PSocial (UBA, Arg.)",
+             "Revista Evaluar (UNC, Arg.)",
+             "Psicodebate (UP, Arg.)",
+             "Pensando Psicología (UCC, Col.)",
+             "Universitas Psychologica (PUJ, Col.)",
+             "Cuadernos Hispanoamericanos de Psicología (UBosque, Col.)" ),
+  pais = c(
+        "Arg.",
+        "Arg.",
+        "Arg.",
+        "Col.",
+        "Col.",
+        "Col."
+  ))
+
+```
+
+Todas las funciones de navegación y recuperación de URLs de `ojsr` toman como input una lista de URLs provista por el usuario, y en todos los casos devuelven una tabla con 2 columnas: `input_url` la URL provista por el usuario, y `output_url` las URLs recogidas. Por lo general, cada input devuelve más de un resultado, de modo que la tabla resultante tiene más registros que los inputs. 
+
+Con las URLs de las revistas, podemos recuperar las de los números, y con ellas, luego las de los artículos. El proceso es el mismo si quisiéramos recuperar galeradas.
+
+```{r scraping con ojsr}
+
+numeros <- ojsr::get_issues_from_archive(input_url = revistas$url)
+articulos <- ojsr::get_articles_from_issue(input_url = numeros$output_url)
+
+```
+
+Con las URLs de los artículos podemos recuperar los metadatos, con los que vamos a hacer nuestros análisis. Las funciones de recuperación de contenido de `ojsr` devuelven una tabla con 5 columnas: `input_url` (la URL provista), `meta_data_name` (el nombre del metadato, e.g., “DC.Date.created”), `meta_data_content` (el contenido o valor del metadato), `meta_data_scheme` (el estandard seguido), `meta_data_xmllang` (idioma). Aquí, particularmente, nos interesan los keywords, de modo que podemos armar una nueva tabla con sólo estos datos.
+
+
+```{r scrap metadatos}
+
+metadatos <- ojsr::get_html_meta_from_article(input_url = articulos$output_url)
+keywords <- metadatos %>% filter(meta_data_name %in% c("citation_keywords", "keywords") )
+
+```
+
+Si quisiéramos agrupar los datos por revistas, podemos anotar cada registro con la URL base de cada OJS, utilizando la función `parse_base_url`.
+
+```{r message=FALSE, warning=FALSE}
+
+revistas$base_url <- ojsr::parse_base_url(revistas$url) 
+numeros$base_url <- ojsr::parse_base_url(numeros$input_url)
+articulos$base_url <- ojsr::parse_base_url(articulos$input_url)
+metadatos$base_url <- ojsr::parse_base_url(metadatos$input_url)
+keywords$base_url <- ojsr::parse_base_url(keywords$input_url)
+
+revistas %>%
+     left_join( numeros %>% group_by( base_url ) %>% summarise(numeros=n()) ) %>%
+     left_join( articulos %>% group_by( base_url ) %>% summarise(articulos=n()) ) %>%
+     left_join( metadatos %>% group_by( base_url ) %>% summarise(metadata=n()) ) %>%
+     left_join( keywords %>% group_by( base_url ) %>% summarise(keywords=n()) ) %>%
+  select(nombre, pais, numeros, articulos, metadata, keywords) %>% view()
+
+```
+
+# 2. Limpieza
+
+Si exploramos los datos, podemos ver que algunas revistas devuelven sus keywords en un único string de palabras separadas por comas u otros símbolos. Para poder continuar con la lógica de 1-registro x 1-keyword, vamos a utilizar la siguiente rutina.
+
+```{r limpiar metadatos}
+
+separar <- function( url , keywords ) {
+  
+  # unificamos el simbolo de corte
+  
+  y <- keywords
+  y <- gsub("<br>" , "$", y, fixed = TRUE)
+  y <- gsub("." , "$", y, fixed = TRUE)
+  y <- gsub("," , "$", y, fixed = TRUE)
+  y <- gsub(";" , "$", y, fixed = TRUE)
+  y <- gsub(":" , "$", y, fixed = TRUE)
+  y <- gsub("– " , "$", y, fixed = TRUE)
+  y <- gsub("–" , "", y, fixed = TRUE)
+  y <- gsub("  " , "$", y, fixed = TRUE)
+  y <- gsub("$" , " $ ", y, fixed = TRUE)
+  
+  # lo separamos en columas
+  
+  y <- str_split_fixed(string = y, pattern = fixed("$"), n=10)
+  z <- data.frame(stringsAsFactors = FALSE, cbind(url,y))
+  
+  # lo pasamos a una tabla larga
+  
+  x <- pivot_longer(data = z, cols = -url, names_to = "key", values_to = "value")
+  
+  # filtramos y normalizamos
+  
+  x <- x %>% 
+    mutate(value = trimws(tolower(value)) ) %>%
+    filter( !is.na(value), 
+            value != "") %>%
+    select(url , keyword=value)
+  
+  # reemplazamos caracteres latinos (acentos y demases)
+  
+    x$keyword <- stringi::stri_trans_general(x$keyword, "Latin-ASCII")
+  
+  # devolvemos df
+  
+  return(x) 
+} 
+
+keywords_limpios <- separar(url = keywords$input_url, keywords = keywords$meta_data_content)
+keywords_limpios$base_url <- ojsr::parse_base_url(keywords_limpios$url)
+keywords_limpios <- left_join( keywords_limpios, revistas , by="base_url")
+
+```
+
+# Análisis y visualización de keywords
+
+Finalmente, vamos a ver los principales keywords por pais.
+
+```{r fig.height=4, fig.width=12}
+
+glimpse(keywords_limpios)
+
+keywords_pais <- keywords_limpios %>% group_by(pais,keyword) %>% 
+  summarise(n=n()) 
+
+keywords_pais %>% group_by(pais,f=n) %>% summarise(n=n()) %>% 
+  ggplot(aes(x=f,y=n)) +
+    geom_line() +
+    theme_minimal() +
+    facet_wrap(~pais)
+  
+set.seed(10)
+keywords_pais %>%
+  filter(n>3) %>%
+  ggplot( aes(label = keyword, size = n, color = as.factor(pais))) +
+    geom_text_wordcloud() +
+    scale_size_area(max_size = 10) +
+    theme_minimal() +
+    facet_wrap(~pais)
+
+```
