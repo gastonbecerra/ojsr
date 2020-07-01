@@ -1,5 +1,9 @@
 ## Resubmission
 
+### 20/07/01
+
+Fixed minor bug in R/scrapers.R 
+
 ### 20/04/16
 
 Fixed in DESCRIPTION:
