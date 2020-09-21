@@ -37,6 +37,7 @@ Fixed in DESCRIPTION:
 * local Windows NT 10.0.17763 / x86_64-w64-mingw32 (64-bit)
 * win-builder
 * Ubuntu 16.04.6 LTS (on travis)
+* Fedora Linux, R-devel, clang, gfortran (on rhub)
 
 ## R CMD check results
 
