@@ -53,7 +53,7 @@ Let’s say we want to scrape metadata from a collection of journals to compare 
 # first, load the library
 library(ojsr)
 
-# we'll use dplyr and ggplot in this example
+# we'll use dplyr and ggplot later in this vignette
 library(tidyverse)
 
 # our collection of journals
@@ -255,7 +255,7 @@ articles <- c(
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
 )
 
-metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles)
+metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles, verbose = TRUE)
 
 ```
 

@@ -403,7 +403,8 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
 ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, output_names ) {
 
   # basic validation
-  if (missing(input_url) | !is.character(input_url) ) { stop("url must be a character string/vector", call. = FALSE) }
+  # if (missing(input_url) | !is.character(input_url) ) { stop("url must be a character string/vector", call. = FALSE) }
+  if (!is.character(input_url) ) { stop("url must be a character string/vector", call. = FALSE) }
   if (!is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
   if (length(url) < 1){ stop("empty url vector to scrap. aborting", call. = FALSE) }
 

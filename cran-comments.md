@@ -35,9 +35,9 @@ Fixed in DESCRIPTION:
 ## Test environments
 
 * local Windows NT 10.0.17763 / x86_64-w64-mingw32 (64-bit)
-* win-builder
-* Ubuntu 16.04.6 LTS (on travis)
-* Fedora Linux, R-devel, clang, gfortran (on rhub)
+* Ubuntu 16.04.6 LTS (on Travis-CI)
+* Windows Server 2008 R2 SP1, R-devel, 32/64 bit (on R-hub)
+* Fedora Linux, R-devel, clang, gfortran (on R-hub)
 
 ## R CMD check results
 
