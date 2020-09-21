@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_articles_from_issue}
 \alias{get_articles_from_issue}
-\title{Scraps an OJS issue and retrieves the articles' url}
+\title{Scraping articles URLs from the ToC of OJS issues}
 \usage{
 get_articles_from_issue(input_url, verbose = FALSE)
 }
@@ -15,7 +15,7 @@ get_articles_from_issue(input_url, verbose = FALSE)
 A long-format dataframe with the url you provided (input_url) and the articles url scrapped (output_url)
 }
 \description{
-Takes a vector of OJS urls and scraps them to retrieve links to OJS articles
+Takes a vector of OJS (issue) URLs and scrapes the links to articles from the issues table of content
 }
 \examples{
 \donttest{

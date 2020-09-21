@@ -1,5 +1,17 @@
 ## Resubmission
 
+### 20/09/21
+
+Fixed in /R, /vignettes, /man:
+- several spelling and grammar errors
+
+Fixed in /R:
+- warnings handled (e.g., when Internet resources fail to load) 
+- unused connections closed
+
+Fixed in DESCRIPTION:
+- removed unused Imports
+
 ### 20/07/01
 
 Fixed minor bug in R/scrapers.R 

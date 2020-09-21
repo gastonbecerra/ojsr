@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_articles_from_search}
 \alias{get_articles_from_search}
-\title{Scraps OJS search results for a given criteria and retrieves the articles' url}
+\title{Scraping OJS search results for a given criteria to retrieve articles’ URL}
 \usage{
 get_articles_from_search(input_url, search_criteria, verbose = FALSE)
 }
@@ -17,8 +17,8 @@ get_articles_from_search(input_url, search_criteria, verbose = FALSE)
 A dataframe with the urls of the articles linked from the OJS issue page.
 }
 \description{
-Takes a vector of OJS urls, process them to create search result pages (including pagination)
-and scraps them to retrieve links to OJS articles
+takes a vector of OJS URLs and a string for search criteria to compose search result URLs,
+(including pagination) then it scrapes them to retrieve the articles’ URLs.
 }
 \examples{
 \donttest{

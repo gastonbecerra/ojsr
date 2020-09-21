@@ -1,7 +1,8 @@
-#' ojsr: A package for scrapping OJS
+#' ojsr: A package for scraping OJS
 #'
-#' This package allows you scrap content (bibliographic metadata) from OJS front-pages and their OAI interfaces;
-#' This is useful when the OJS Rest API is not available (as in OJS installments prior to v3.1).
+#' This package allows you to crawl OJS archives, issues, articles, galleys,
+#' and search results, and retrieve metadata from articles.
+#' This is useful if OJS Rest API is not available (as in installations prior to v3.1).
 #' It also includes function to parse OJS specific URL conventions.
 #'
 #' @docType package

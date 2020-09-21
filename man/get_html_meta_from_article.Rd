@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_html_meta_from_article}
 \alias{get_html_meta_from_article}
-\title{Scraps metadata from the HTML of OJS articles}
+\title{Scraping metadata from the OJS articles HTML}
 \usage{
 get_html_meta_from_article(input_url, verbose = FALSE)
 }
@@ -17,7 +17,7 @@ the content of the metadata (meta_data_content), the standard in which the conte
 and the language in which the metadata was entered (meta_data_xmllang)
 }
 \description{
-Takes a vector of OJS urls and and scraps the metadata written in the html.
+Takes a vector of OJS URLs and scrapes all metadata written in HTML from the article view
 }
 \examples{
 \donttest{

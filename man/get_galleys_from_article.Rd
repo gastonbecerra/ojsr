@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_galleys_from_article}
 \alias{get_galleys_from_article}
-\title{Scraps an OJS article for galley links}
+\title{Scraping galleys URLs from OJS articles}
 \usage{
 get_galleys_from_article(input_url, verbose = FALSE)
 }
@@ -16,7 +16,7 @@ A long-format dataframe with the url you provided (input_url), the articles url 
 the format of the galley (format), and the url that forces download of the galley (download_url)
 }
 \description{
-Takes a vector of OJS urls and scraps them to retrieve links to OJS galleys
+Takes a vector of OJS URLs and scrapes all the galleys URLs from the article view
 }
 \examples{
 \donttest{

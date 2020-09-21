@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_issues_from_archive}
 \alias{get_issues_from_archive}
-\title{Scraps an OJS issues archive and retrieves the issues' url}
+\title{Scraping issues’ URLs from the OJS issues archive}
 \usage{
 get_issues_from_archive(input_url, verbose = FALSE)
 }
@@ -15,7 +15,7 @@ get_issues_from_archive(input_url, verbose = FALSE)
 A long-format dataframe with the url you provided (input_url) and the url of issues found (output_url)
 }
 \description{
-Takes a vector of OJS urls and scraps their archive of issues to retrieve links to OJS issues.
+Takes a vector of OJS URLs and scrapes the issues URLs from the issue archive.
 }
 \examples{
 \donttest{

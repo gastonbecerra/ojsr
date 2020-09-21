@@ -2,7 +2,7 @@
 % Please edit documentation in R/scrapers.R
 \name{get_oai_meta_from_article}
 \alias{get_oai_meta_from_article}
-\title{Get OAI metadata from an OJS article url}
+\title{Retrieving OAI records for OJS articles}
 \usage{
 get_oai_meta_from_article(input_url, verbose = FALSE)
 }
@@ -16,7 +16,7 @@ A long-format dataframe with the url you provided (input_url), the name of the m
 and the content of the metadata (meta_data_content).
 }
 \description{
-This functions access OAI records (within OJS) for any article for which you provided an url.
+This functions access OAI records (within OJS) for any article for which you provided an URL.
 }
 \details{
 Several limitations are in place. Please refer to vignette.

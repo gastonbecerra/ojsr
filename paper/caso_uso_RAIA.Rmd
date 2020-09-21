@@ -22,7 +22,8 @@ Para este ejemplo, usaremos funciones del conjunto de paquetes `tidy`.
 
 library('ojsr') # carga el paquete en memoria
 library('tidyverse') # vamos a usar dplyr y ggplot
-library(ggwordcloud)
+library('ggwordcloud')
+
 ```
 
 # 1. Adquisición de datos
@@ -81,7 +82,7 @@ keywords <- metadatos %>% filter(meta_data_name %in% c("citation_keywords", "key
 
 Si quisiéramos agrupar los datos por revistas, podemos anotar cada registro con la URL base de cada OJS, utilizando la función `parse_base_url`.
 
-```{r message=FALSE, warning=FALSE}
+```{r}
 
 revistas$base_url <- ojsr::parse_base_url(revistas$url) 
 numeros$base_url <- ojsr::parse_base_url(numeros$input_url)

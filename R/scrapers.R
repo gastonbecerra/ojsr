@@ -1,6 +1,6 @@
-#' Scraps an OJS issues archive and retrieves the issues' url
+#' Scraping issues’ URLs from the OJS issues archive
 #'
-#' Takes a vector of OJS urls and scraps their archive of issues to retrieve links to OJS issues.
+#' Takes a vector of OJS URLs and scrapes the issues URLs from the issue archive.
 #'
 #' @param input_url Character vector.
 #' @param verbose Logical.
@@ -26,9 +26,9 @@ get_issues_from_archive <- function ( input_url , verbose = FALSE ) {
 }
 
 
-#' Scraps an OJS issue and retrieves the articles' url
+#' Scraping articles URLs from the ToC of OJS issues
 #'
-#' Takes a vector of OJS urls and scraps them to retrieve links to OJS articles
+#' Takes a vector of OJS (issue) URLs and scrapes the links to articles from the issues table of content
 #'
 #' @param input_url Character vector.
 #' @param verbose Logical.
@@ -54,9 +54,9 @@ get_articles_from_issue <- function ( input_url , verbose = FALSE ) {
 }
 
 
-#' Scraps an OJS article for galley links
+#' Scraping galleys URLs from OJS articles
 #'
-#' Takes a vector of OJS urls and scraps them to retrieve links to OJS galleys
+#' Takes a vector of OJS URLs and scrapes all the galleys URLs from the article view
 #'
 #' @param input_url Character vector.
 #' @param verbose Logical.
@@ -82,10 +82,10 @@ get_galleys_from_article <- function ( input_url , verbose = FALSE ) {
 }
 
 
-#' Scraps OJS search results for a given criteria and retrieves the articles' url
+#' Scraping OJS search results for a given criteria to retrieve articles’ URL
 #'
-#' Takes a vector of OJS urls, process them to create search result pages (including pagination)
-#' and scraps them to retrieve links to OJS articles
+#' takes a vector of OJS URLs and a string for search criteria to compose search result URLs,
+#' (including pagination) then it scrapes them to retrieve the articles’ URLs.
 #'
 #' @param input_url Character vector.
 #' @param search_criteria Character string
@@ -128,12 +128,19 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
 
       # reading webpage from url
       webpage_read = FALSE;
-      tryCatch({ # reading the webpage
-        webpage <- xml2::read_html(url[i]) # url page content
-        webpage_read = TRUE;
-      }, warning = function(war) { warning(paste("warning reading ", url[i], " : ",war)) ; closeAllConnections();
-      }, error = function(err) { warning(paste("error reading ", url[i], " : ",err)); closeAllConnections();
-      })
+      tryCatch(
+        { # reading the webpage
+          url_con = url(url[i], "rb")
+          webpage <- xml2::read_html(url_con)
+          close(url_con)
+          webpage_read = TRUE;
+        }, warning = function(war) {
+          message("warning reading URL ", url[i], " : ", substr( war, 0, 100)  ,"...")
+        }, error = function(err) {
+          message("error reading URL ", url[i], " : ", substr( err, 0, 100)  ,"...")
+        }, finally = {
+        }
+      )
 
       if ( webpage_read ) {
 
@@ -180,9 +187,9 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
 }
 
 
-#' Scraps metadata from the HTML of OJS articles
+#' Scraping metadata from the OJS articles HTML
 #'
-#' Takes a vector of OJS urls and and scraps the metadata written in the html.
+#' Takes a vector of OJS URLs and scrapes all metadata written in HTML from the article view
 #'
 #' @param input_url Character vector.
 #' @param verbose Logical.
@@ -230,14 +237,21 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
     if (!is.na(url[i])) {
 
       # reading webpage from url
-
       webpage_read = FALSE;
-      tryCatch({ # reading the webpage
-        webpage <- xml2::read_html(url[i]) # url page content
-        webpage_read = TRUE;
-      }, warning = function(war) { warning(paste("warning reading ", url[i], " : ",war)) ; closeAllConnections();
-      }, error = function(err) { warning(paste("error reading ", url[i], " : ",err)); closeAllConnections();
-      })
+      tryCatch(
+        { # reading the webpage
+          url_con = url(url[i], "rb")
+          webpage <- xml2::read_html(url_con)
+          close(url_con)
+          webpage_read = TRUE;
+        }, warning = function(war) {
+          message("warning reading URL ", url[i], " : ", substr( war, 0, 100)  ,"...")
+        }, error = function(err) {
+          message("error reading URL ", url[i], " : ", substr( err, 0, 100)  ,"...")
+        }, finally = {
+        }
+      )
+
 
       if ( webpage_read ) {
 
@@ -274,9 +288,9 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 }
 
 
-#' Get OAI metadata from an OJS article url
+#' Retrieving OAI records for OJS articles
 #'
-#' This functions access OAI records (within OJS) for any article for which you provided an url.
+#' This functions access OAI records (within OJS) for any article for which you provided an URL.
 #'
 #' Several limitations are in place. Please refer to vignette.
 #'
@@ -324,12 +338,12 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
       tryCatch({
         identify_xml <- xml2::read_xml( identify_url )
         identify_list <- identify_xml %>% xml2::as_list()
-      }, warning = function(war) { warning(paste("warning processing ", identify_url)) ;
-      }, error = function(err) { warning(paste("error processing ", identify_url));
+      }, warning = function(war) { message("warning processing ", identify_url) ;
+      }, error = function(err) { message("error processing ", identify_url);
       })
 
       if ( 'error' %in% names(identify_list[[1]]) ) {
-        warning("OAI identity records could not be found on ", identify_url)
+        message("OAI identity records could not be found on ", identify_url)
       } else {
         identifier <- identify_list[[1]]$Identify$description$`oai-identifier` %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE, row.names = FALSE)
         baseIdentifier <- paste0(
@@ -352,8 +366,8 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
 
           # print(record)
 
-        }, warning = function(war) { warning(paste("warning processing ", record_url)) ;
-        }, error = function(err) { warning(paste("error processing ", record_url));
+        }, warning = function(war) { message("warning processing ", record_url);
+        }, error = function(err) { message("error processing ", record_url);
         })
 
         if ( ! "error" %in% names(record[[1]]) ) {
@@ -369,13 +383,13 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
               registro_tidy$meta_data_xmllang <- NA
               df <- rbind(df,registro_tidy)
             } else {
-              warning("OAI record could not be parsed for url ", url[i], "\n")
+              message("OAI record could not be parsed for url ", url[i], "\n")
             }
-          }, warning = function(war) { warning(paste("warning processing ", url[i]),war) ;
-          }, error = function(err) { warning(paste("error processing ", url[i]),err);
+          }, warning = function(war) { message("warning processing ", url[i]);
+          }, error = function(err) { message("error processing ", url[i]);
           })
         } else {
-          warning("OAI record not found on ", record_url, " for url ", url[i], "\n")
+          message("OAI record not found on ", record_url, " for url ", url[i], "\n")
         }
       }
     }
@@ -403,14 +417,20 @@ ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, o
 
     if (!is.na(url[i])) {
 
-      # reading webpage from url
       webpage_read = FALSE;
-      tryCatch({ # reading the webpage
-        webpage <- xml2::read_html(url[i]) # url page content
-        webpage_read = TRUE;
-      }, warning = function(war) { warning(paste("warning reading ", url[i], " : ",war)) ; closeAllConnections();
-      }, error = function(err) { warning(paste("error reading ", url[i], " : ",err)); closeAllConnections();
-      })
+      tryCatch(
+        { # reading the webpage
+          url_con = url(url[i], "rb")
+          webpage <- xml2::read_html(url_con)
+          close(url_con)
+          webpage_read = TRUE;
+        }, warning = function(war) {
+          message("warning reading URL ", url[i], " : ", substr( war, 0, 100)  ,"...")
+        }, error = function(err) {
+          message("error reading URL ", url[i], " : ", substr( err, 0, 100)  ,"...")
+        }, finally = {
+        }
+      )
 
       if ( webpage_read ) {
 
@@ -482,4 +502,3 @@ ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, o
   }
   return(df)
 }
-
