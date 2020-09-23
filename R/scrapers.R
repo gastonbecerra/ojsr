@@ -313,8 +313,12 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
 
   url <- input_url
 
-  if ( !is.character(url) ) { stop("url must be a character string/vector", call. = FALSE) }
-  if ( !is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
+  if ( !is.character(url) ) {
+    stop("url must be a character string/vector", call. = FALSE)
+    }
+  if ( !is.logical(verbose) ) {
+    stop("verbose must be logical", call. = FALSE)
+  }
 
   oai_base_url = ""
   oai_identifier = ""
@@ -335,61 +339,69 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
       identify_url <- paste0(oai_base_url, "/?verb=Identify")
       if (verbose) { message("identifying on ", identify_url) }
 
+      webpage_read = FALSE
       tryCatch({
-        identify_xml <- xml2::read_xml( identify_url )
-        identify_list <- identify_xml %>% xml2::as_list()
+
+        url_con = url(identify_url, "rb")
+        identify_xml <- xml2::read_xml( url_con )
+        close(url_con)
+        webpage_read = TRUE
+
       }, warning = function(war) { message("warning processing ", identify_url) ;
       }, error = function(err) { message("error processing ", identify_url);
       })
 
-      if ( 'error' %in% names(identify_list[[1]]) ) {
-        message("OAI identity records could not be found on ", identify_url)
-      } else {
-        identifier <- identify_list[[1]]$Identify$description$`oai-identifier` %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE, row.names = FALSE)
-        baseIdentifier <- paste0(
-          identifier$scheme,
-          identifier$delimiter,
-          identifier$repositoryIdentifier,
-          identifier$delimiter,
-          "article/",
-          article_id
-        )
-        record_url <- paste0(
-          oai_base_url,
-          "/?verb=GetRecord&metadataPrefix=oai_dc&identifier=",
-          baseIdentifier
-        )
-        if (verbose) { message("looking for record on ", record_url) }
-
-        tryCatch({
-          record <- xml2::read_xml(record_url) %>% xml2::as_list()
-
-          # print(record)
-
-        }, warning = function(war) { message("warning processing ", record_url);
-        }, error = function(err) { message("error processing ", record_url);
-        })
-
-        if ( ! "error" %in% names(record[[1]]) ) {
-          tryCatch({
-            registro <- record[[1]]$GetRecord$record$metadata$dc %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE)
-            if (!missing(registro)){
-              registro_tidy <- registro %>%
-                cbind( input_url = as.character(url[i]) , deparse.level = TRUE) %>%
-                tidyr::pivot_longer(-input_url, names_to = "meta_data_name", values_to = "meta_data_content")
-              registro_tidy$meta_data_name <- sub('\\..*', '', registro_tidy$meta_data_name)
-              registro_tidy$input_url <- as.character(registro_tidy$input_url)
-              registro_tidy$meta_data_scheme <- NA
-              registro_tidy$meta_data_xmllang <- NA
-              df <- rbind(df,registro_tidy)
-            } else {
-              message("OAI record could not be parsed for url ", url[i], "\n")
-            }
-          }, warning = function(war) { message("warning processing ", url[i]);
-          }, error = function(err) { message("error processing ", url[i]);
-          })
+      if ( webpage_read ) {
+        identify_list <- identify_xml %>% xml2::as_list()
+        if ( 'error' %in% names(identify_list[[1]]) ) {
+          message("OAI identity records could not be found on ", identify_url)
         } else {
-          message("OAI record not found on ", record_url, " for url ", url[i], "\n")
+          identifier <- identify_list[[1]]$Identify$description$`oai-identifier` %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE, row.names = FALSE)
+          baseIdentifier <- paste0(
+            identifier$scheme,
+            identifier$delimiter,
+            identifier$repositoryIdentifier,
+            identifier$delimiter,
+            "article/",
+            article_id
+          )
+          record_url <- paste0(
+            oai_base_url,
+            "/?verb=GetRecord&metadataPrefix=oai_dc&identifier=",
+            baseIdentifier
+          )
+          if (verbose) { message("looking for record on ", record_url) }
+
+          tryCatch({
+            record <- xml2::read_xml(record_url) %>% xml2::as_list()
+
+            # print(record)
+
+          }, warning = function(war) { message("warning processing ", record_url);
+          }, error = function(err) { message("error processing ", record_url);
+          })
+
+          if ( ! "error" %in% names(record[[1]]) ) {
+            tryCatch({
+              registro <- record[[1]]$GetRecord$record$metadata$dc %>% unlist() %>% t() %>% data.frame(stringsAsFactors = FALSE)
+              if (!missing(registro)){
+                registro_tidy <- registro %>%
+                  cbind( input_url = as.character(url[i]) , deparse.level = TRUE) %>%
+                  tidyr::pivot_longer(-input_url, names_to = "meta_data_name", values_to = "meta_data_content")
+                registro_tidy$meta_data_name <- sub('\\..*', '', registro_tidy$meta_data_name)
+                registro_tidy$input_url <- as.character(registro_tidy$input_url)
+                registro_tidy$meta_data_scheme <- NA
+                registro_tidy$meta_data_xmllang <- NA
+                df <- rbind(df,registro_tidy)
+              } else {
+                message("OAI record could not be parsed for url ", url[i], "\n")
+              }
+            }, warning = function(war) { message("warning processing ", url[i]);
+            }, error = function(err) { message("error processing ", url[i]);
+            })
+          } else {
+            message("OAI record not found on ", record_url, " for url ", url[i], "\n")
+          }
         }
       }
     }
@@ -403,8 +415,7 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
 ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, output_names ) {
 
   # basic validation
-  # if (missing(input_url) | !is.character(input_url) ) { stop("url must be a character string/vector", call. = FALSE) }
-  if (!is.character(input_url) ) { stop("url must be a character string/vector", call. = FALSE) }
+  if (missing(input_url) | !is.character(input_url) ) { stop("url must be a character string/vector", call. = FALSE) }
   if (!is.logical(verbose) ) { stop("verbose must be logical", call. = FALSE) }
   if (length(url) < 1){ stop("empty url vector to scrap. aborting", call. = FALSE) }
 

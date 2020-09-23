@@ -1,6 +1,6 @@
 ## Resubmission
 
-### 20/09/21
+### 22/09/21
 
 Fixed in /R, /vignettes, /man:
 - several spelling and grammar errors
@@ -21,14 +21,14 @@ Fixed minor bug in R/scrapers.R
 Fixed in DESCRIPTION:
 - OJS and OAI acronyms mentioned in undirected single quotes.
 
-AlsO:
+Also:
 - deleted dev comments in test file
 
 ### 20/04/14
 
 Fixed in DESCRIPTION:
 - omit the redundant "for R" in Title
-- mis-spelled words: "functiones" (11:18)
+- misspelled words: "functiones" (11:18)
 - The Description field should not start with the package name, 'This package' or similar.
 - Finally, package names should be single quoted in the Description field. (removed name from description)
 
@@ -41,4 +41,8 @@ Fixed in DESCRIPTION:
 
 ## R CMD check results
 
-There were no ERRORs, WARNINGs or NOTEs
+There were no ERRORs or WARNINGs 
+
+There's 1 NOTE in Ubuntu:
+"checking for future file timestamps ... NOTE / unable to verify current time"
+According to https://stat.ethz.ch/pipermail/r-package-devel/2020q3/005931.html this is due an unavailable third-party service

@@ -26,7 +26,7 @@ ojsr allows you to crawl OJS archives, issues, articles, galleys, and search res
 **Important Notes:**
 
 - **ojsr functions rely on OJS routing conventions**, therefore, OJS installations using custom routing conventions will most probably fail (see <https://docs.pkp.sfu.ca/dev/documentation/en/architecture-routes>);
-- **ojsr does not scrape the URL you provide!**. ojsr composes the required URL for different scrapping scenarios (e.g., if you are scrapping articles from an issue, it will parse and browse the issue's ToC).
+- **ojsr does not scrape the URL you provide**. ojsr composes the required URL for different scrapping scenarios (e.g., if you are scrapping articles from an issue, it will parse and browse the issue's ToC).
 
 ## About OJS
 
@@ -59,15 +59,19 @@ library(tidyverse)
 # our collection of journals
 journals <- data.frame ( cbind(
     name = c( 
-      "PSocial",
+      "Psicodebate",
       "Odisea"
       ),
     url = c(
-      "https://publicaciones.sociales.uba.ar/index.php/psicologiasocial",
+      "https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive",
       "https://publicaciones.sociales.uba.ar/index.php/odisea"
       )
   ), stringsAsFactors = FALSE
 )
+
+```
+
+```{r funciones get}
 
 # we are using the journal url as input to retrieve issues
 issues <- ojsr::get_issues_from_archive(input_url = journals$url) 
@@ -110,7 +114,11 @@ Now we can do our analysis: exploring main keywords per journal. For this, we ke
 ```{r fig.height=3, fig.width=7}
 
 metadata %>% 
-  filter(meta_data_name=="citation_keywords", meta_data_xmllang=="es") %>% # filtering keywords
+  filter(
+      meta_data_name=="citation_keywords", 
+      meta_data_xmllang=="es",
+      trimws(meta_data_content)!=""
+    ) %>% # filtering keywords
   group_by(base_url, keyword = meta_data_content) %>% 
   tally(sort=TRUE) %>% top_n(wt = n, n = 3) %>% # 3 most frequent keywords by journal
   left_join( journals , by="base_url") %>% # let's include the journal names
@@ -255,7 +263,7 @@ articles <- c(
   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
 )
 
-metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles, verbose = TRUE)
+metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles)
 
 ```
 

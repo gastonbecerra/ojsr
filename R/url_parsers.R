@@ -50,7 +50,9 @@ parse_oai_url <- function ( input_url ) {
 
 process_urls <- function( url ) {
 
-  if( !is.character(url) ) { stop("url must be a character string or vector") }
+  if( !is.character(url) ) {
+    stop("url must be a character string or vector")
+  }
 
   url_input <- data.frame(input_url=url, stringsAsFactors = FALSE) # saving the input to rejoin after processing
 
