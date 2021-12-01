@@ -9,6 +9,7 @@ output:
 [![Travis-CI Build
 Status](https://travis-ci.org/gastonbecerra/ojsr.svg?branch=master)](https://travis-ci.org/github/gastonbecerra/ojsr)
 [![CRAN status](https://www.r-pkg.org/badges/version/ojsr)](https://cran.r-project.org/package=ojsr)
+[![R-CMD-check](https://github.com/gastonbecerra/ojsr/workflows/R-CMD-check/badge.svg)](https://github.com/gastonbecerra/ojsr/actions)
 <!-- badges: end -->
 
 The aim of this package is to aid you in crawling OJS archives, issues, articles, galleys, and search results, and retrieving/scraping metadata from articles. **ojsr functions rely on OJS routing conventions** to compose the URL for different scraping scenarios.
