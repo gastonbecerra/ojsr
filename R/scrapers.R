@@ -130,9 +130,10 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
       webpage_read = FALSE;
       tryCatch(
         { # reading the webpage
-          url_con = url(url[i], "rb")
+          # url_con = url(url[i], open = "rb" )
+          url_con <- RCurl::getURL(url = url[i], .opts = (timeout=120) )
           webpage <- xml2::read_html(url_con)
-          close(url_con)
+          # close(url_con)
           webpage_read = TRUE;
         }, warning = function(war) {
           message("warning reading URL ", url[i], " : ", substr( war, 0, 100)  ,"...")
@@ -240,9 +241,10 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
       webpage_read = FALSE;
       tryCatch(
         { # reading the webpage
-          url_con = url(url[i], "rb")
+          # url_con = url(url[i], "rb")
+          url_con <- RCurl::getURL(url = url[i], .opts = (timeout=120) )
           webpage <- xml2::read_html(url_con)
-          close(url_con)
+          # close(url_con)
           webpage_read = TRUE;
         }, warning = function(war) {
           message("warning reading URL ", url[i], " : ", substr( war, 0, 100)  ,"...")
@@ -342,9 +344,10 @@ get_oai_meta_from_article <- function ( input_url , verbose = FALSE ) {
       webpage_read = FALSE
       tryCatch({
 
-        url_con = url(identify_url, "rb")
+        # url_con = url(identify_url, "rb")
+        url_con <- RCurl::getURL(url = identify_url, .opts = (timeout=120) )
         identify_xml <- xml2::read_xml( url_con )
-        close(url_con)
+        # close(url_con)
         webpage_read = TRUE
 
       }, warning = function(war) { message("warning processing ", identify_url) ;
@@ -432,14 +435,14 @@ ojsr_scrap_v3 <- function ( input_url, verbose, from, conventional_url, xpath, o
       webpage_read = FALSE;
       tryCatch(
         { # reading the webpage
-          url_con = url(url[i], "rb")
+          # url_con = url(url[i], "rb")
+          url_con <- RCurl::getURL(url = url[i], .opts = (timeout=120) )
           webpage <- xml2::read_html(url_con)
-          close(url_con)
           webpage_read = TRUE;
         }, warning = function(war) {
-          message("warning reading URL ", url[i], " : ", substr( war, 0, 100)  ,"...")
+          message("warning reading URL ", url[i], " : ", substr( war, 0, 100) )
         }, error = function(err) {
-          message("error reading URL ", url[i], " : ", substr( err, 0, 100)  ,"...")
+          message("error reading URL ", url[i], " : ", substr( err, 0, 100) )
         }, finally = {
         }
       )

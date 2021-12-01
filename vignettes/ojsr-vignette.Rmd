@@ -44,11 +44,14 @@ Since OJS v3.1+ <https://docs.pkp.sfu.ca/dev/api/ojs/3.1> a Rest API is provided
 
 # Example
 
-## Scraping complete journals to compare their most common keywords
+## Scraping complete journals to compare their metadata
 
-Let’s say we want to scrape metadata from a collection of journals to compare them. We have their names and URLs, and can use ojsr to scrape their issues, articles, and metadata.
+Let’s say we want to scrape metadata from a journal's issue collection of journals to compare them. 
+We start with the journal's titles and URL, and can use ojsr to scrape their issues, articles, and metadata.
 
-```{r}
+```{r fullexample , eval = FALSE }
+
+# NOT RUN {
 
 # first, load the library
 library(ojsr)
@@ -69,10 +72,6 @@ journals <- data.frame ( cbind(
   ), stringsAsFactors = FALSE
 )
 
-```
-
-```{r funciones get}
-
 # we are using the journal url as input to retrieve issues
 issues <- ojsr::get_issues_from_archive(input_url = journals$url) 
 
@@ -82,11 +81,7 @@ articles <- ojsr::get_articles_from_issue(input_url = issues$output_url)
 # we are using the articles url we just scraped as the input to retrieve metadata
 metadata <- ojsr::get_html_meta_from_article(input_url = articles$output_url)
 
-```
-
-Before doing some analysis, let's bind these together to have a better understanding of our journals. Since we are interested in summarizing by journal, we can use `ojsr::parse_base_url()` on our tables to have a binding value. 
-
-```{r}
+# Since we are interested in summarizing and comparing by journal, we can use `ojsr::parse_base_url()` on our tables to have a binding value. 
 
 # we are including the base_url on each table to simplify joining
 journals$base_url <- ojsr::parse_base_url(journals$url)
@@ -107,25 +102,7 @@ journals %>%
     by="base_url") %>%
   select( name, n_issues, n_articles, n_metadata )
 
-```
-
-Now we can do our analysis: exploring main keywords per journal. For this, we keep only non-empty keywords metadata in Spanish; then, we pick the 3 most frequent keywords (you would typically do some cleanup and normalization first); finally we plot by journal.
-
-```{r fig.height=3, fig.width=7}
-
-metadata %>% 
-  filter(
-      meta_data_name=="citation_keywords", 
-      meta_data_xmllang=="es",
-      trimws(meta_data_content)!=""
-    ) %>% # filtering keywords
-  group_by(base_url, keyword = meta_data_content) %>% 
-  tally(sort=TRUE) %>% top_n(wt = n, n = 3) %>% # 3 most frequent keywords by journal
-  left_join( journals , by="base_url") %>% # let's include the journal names
-  ggplot(aes(x=reorder(keyword,n),y=n)) + 
-    facet_wrap(~name, scales = "free") + 
-    geom_bar(stat = "identity") + 
-    coord_flip()
+# }
 
 ```
 
@@ -140,12 +117,9 @@ Then, it looks for links containing "/issue/view" in the href. Links are post-pr
 
 ```{r}
 
-journals <- c( 
-  'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive', # issue archive
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903' # article
-)
+journal <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate' 
 
-issues <- ojsr::get_issues_from_archive(input_url = journals)
+issues <- ojsr::get_issues_from_archive(input_url = journal)
 
 ```
 
@@ -162,12 +136,9 @@ You don't need to provide the actual URL of the issues' ToC, but you must provid
 
 ```{r}
 
-issues <- c( 
-  'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65', # issue including ToC
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31' # no ToC nor links
-)
+issue <- 'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65' # issue including ToC
 
-articles <- ojsr::get_articles_from_issue(input_url = issues) 
+articles <- ojsr::get_articles_from_issue(input_url = issue) 
 
 ```
 
@@ -184,13 +155,11 @@ You don't need to provide the actual URL of the search result pages. `get_articl
 
 ```{r}
 
-journals <- c( 
-  'https://revistapsicologia.uchile.cl/index.php/RDP/', 
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/current' 
-)
+journal <- 'https://revistapsicologia.uchile.cl/index.php/RDP/'
 
 criteria <- "psicologia"
-articles_search <- ojsr::get_articles_from_search(input_url = journals, search_criteria = criteria)
+
+articles_search <- ojsr::get_articles_from_search(input_url = journal, search_criteria = criteria)
 
 ```
 
@@ -209,12 +178,9 @@ You may provide any article-level URL (article abstract view, inline view, PDF d
 
 ```{r}
 
-articles <- c( 
-  'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657', # galleys pdf and mp3
-  'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # inline reader
-)
+article <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # inline reader
 
-galleys <- ojsr::get_galleys_from_article(input_url = articles) 
+galleys <- ojsr::get_galleys_from_article(input_url = article) 
 
 ```
 
@@ -233,12 +199,9 @@ You may provide any article-level URL (article abstract view, inline view, PDF d
 
 ```{r}
 
-articles <- c( 
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
-  'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
-)
+article <- 'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137'
 
-metadata <- ojsr::get_html_meta_from_article(input_url = articles) 
+metadata <- ojsr::get_html_meta_from_article(input_url = article) 
 
 ```
 
@@ -258,12 +221,9 @@ An alternative to web scraping metadata from the article pages HTML is to retrie
 
 ```{r}
 
-articles <- c(  
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
-  'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
-)
+article <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
 
-metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles)
+metadata_oai <- ojsr::get_oai_meta_from_article(input_url = article)
 
 ```
 
