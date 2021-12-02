@@ -1,3 +1,10 @@
+# ojsr 0.1.3
+
+* Included automatic checks via GitHub actions
+* Included test for failing resources
+* Included timeout in scrapping
+* Included /donotrun on vignete
+
 # ojsr 0.1.2
 
 * Removed unused Imports
