@@ -1,5 +1,14 @@
 ## Resubmission
 
+### 22/12/01
+
+Fixed in /R, /vignettes, /man:
+- timeout when online resource was not available
+- do not run on long example
+
+Included in /tests
+- testing for resulting objects when online resource was not available
+
 ### 22/09/21
 
 Fixed in /R, /vignettes, /man:
