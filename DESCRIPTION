@@ -14,6 +14,8 @@ Description: Crawler for 'OJS' pages and scraper for meta-data from articles.
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+URL: https://github.com/gastonbecerra/ojsr
+BugReports: https://github.com/gastonbecerra/ojsr/issues
 Imports:
     dplyr (>= 0.8.3),
     magrittr,
