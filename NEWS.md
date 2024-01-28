@@ -1,3 +1,8 @@
+# ojsr 0.1.4
+
+* Removed travis CI
+* Removed tidyverse from suggests
+
 # ojsr 0.1.3
 
 * Included automatic checks via GitHub actions
