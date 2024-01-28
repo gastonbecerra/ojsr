@@ -5,6 +5,8 @@
 #' This is useful if OJS Rest API is not available (as in installations prior to v3.1).
 #' It also includes function to parse OJS specific URL conventions.
 #'
-#' @docType package
 #' @name ojsr
+"_PACKAGE"
+#'
+
 NULL

@@ -2,6 +2,7 @@
 
 * Removed travis CI
 * Removed tidyverse from suggests
+* PKGNAME-package issue corrected
 
 # ojsr 0.1.3
 
