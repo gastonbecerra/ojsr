@@ -1,13 +1,7 @@
----
-output:
-  word_document: default
-  html_document: default
----
 # OJS Scraper for R
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/ojsr)](https://cran.r-project.org/package=ojsr)
-[![R-CMD-check](https://github.com/gastonbecerra/ojsr/workflows/R-CMD-check/badge.svg)](https://github.com/gastonbecerra/ojsr/actions)
 [![R-CMD-check](https://github.com/gastonbecerra/ojsr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/gastonbecerra/ojsr/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
@@ -30,18 +24,18 @@ devtools::install_github("gastonbecerra/ojsr")
 
 # ojsr functions
 
-- **`get_issues_from_archive()`**: It scrapes issues URLs from OJS issues archive
-- **`get_articles_from_issue()`**: It scrapes articles URLs from the ToC of OJS issues
-- **`get_articles_from_search()`**: It scrapes OJS search results for a given criteria to retrieve articles URLs
-- **`get_galleys_from_article()`**: It scrapes galleys URLs from OJS articles
-- **`get_html_meta_from_article()`**: It scrapes metadata from OJS articles HTML
-- **`get_oai_meta_from_article()`**: It retrieves OAI records for OJS articles
-- **`parse_base_url()`**: It parses URLs against OJS routing conventions to retrieve the base URL
-- **`parse_oai_url()`**: It parses URLs against OJS routing conventions to retrieve the OAI protocol URL
+- **`get_issues_from_archive()`**: scrapes issues URLs from OJS issues archive
+- **`get_articles_from_issue()`**: scrapes articles URLs from the ToC of OJS issues
+- **`get_articles_from_search()`**: scrapes OJS search results for a given criteria to retrieve articles URLs
+- **`get_galleys_from_article()`**: scrapes galleys URLs from OJS articles
+- **`get_html_meta_from_article()`**: scrapes metadata from OJS articles HTML
+- **`get_oai_meta_from_article()`**: retrieves OAI records for OJS articles
+- **`parse_base_url()`**: parses URLs against OJS routing conventions to retrieve the base URL
+- **`parse_oai_url()`**: parses URLs against OJS routing conventions to retrieve the OAI protocol URL
 
 # Example
 
-Let's say we want to scrape metadata from a collection of journals to compare their top keywords. We have the journal names and URLs and can use ojsr to scrap their issues, articles and metadata.
+Let's say we want to collect metadata from some journals to compare their top keywords. We have the journals' names and URLs, and can use ojsr to scrap their issues, articles and metadata.
 
 ```{r}
 
