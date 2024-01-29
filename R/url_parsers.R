@@ -18,7 +18,9 @@
 #' @export
 parse_base_url <- function ( input_url ) {
   url_parsed <- process_urls(input_url)
-  df <- url_parsed %>% dplyr::select(base_url) %>% unlist(use.names = FALSE)
+  df <- url_parsed %>%
+      dplyr::select("base_url") %>%
+      unlist(use.names = FALSE)
   return(df)
 }
 
@@ -43,7 +45,9 @@ parse_base_url <- function ( input_url ) {
 #' @export
 parse_oai_url <- function ( input_url ) {
   url_parsed <- process_urls(input_url)
-  df <- url_parsed %>% dplyr::select(conventional_oai) %>% unlist(use.names = FALSE)
+  df <- url_parsed %>%
+    dplyr::select("conventional_oai") %>%
+    unlist(use.names = FALSE)
   return(df)
 }
 
