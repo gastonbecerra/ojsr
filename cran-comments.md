@@ -1,5 +1,11 @@
 ## Resubmission
 
+### 24/01/28
+
+- Corrected the alias issue, by creating ojsr-package.R
+- Removed tidyverse from suggested imports
+- included repo/issues links in descriptions
+
 ### 22/12/01
 
 Fixed in /R, /vignettes, /man:

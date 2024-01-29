@@ -263,7 +263,7 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 
         if (verbose) { message("scrapped ", substr(url[i],1,15), " ... found ", length(meta_data_tags), " elements using criteria ", xpath) }
 
-        if (class(meta_data_tags)=="xml_nodeset"){
+        if (is(meta_data_tags,"xml_nodeset")){
           meta_data_tags_list <- xml2::xml_attrs(meta_data_tags)
           meta_data_name <- meta_data_content <- meta_data_scheme <- meta_data_xmllang <- NA
           if (length(meta_data_tags_list)>0){
