@@ -44,63 +44,23 @@ Since OJS v3.1+ <https://docs.pkp.sfu.ca/dev/api/ojs/3.1> a Rest API is provided
 
 # Example
 
-## Scraping complete journals to compare their metadata
+## Scraping complete journals
 
 Let’s say we want to scrape metadata from a journal's issue collection of journals to compare them. 
 We start with the journal's titles and URL, and can use ojsr to scrape their issues, articles, and metadata.
 
 ```{r fullexample , eval = FALSE }
-
 # NOT RUN {
 
-# first, load the library
 library(ojsr)
 
-# we'll use dplyr and ggplot later in this vignette
-library(tidyverse)
+journal <- 'https://revistapsicologia.uchile.cl/index.php/RDPx/'
 
-# our collection of journals
-journals <- data.frame ( cbind(
-    name = c( 
-      "Psicodebate",
-      "Odisea"
-      ),
-    url = c(
-      "https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive",
-      "https://publicaciones.sociales.uba.ar/index.php/odisea"
-      )
-  ), stringsAsFactors = FALSE
-)
+issues <- ojsr::get_issues_from_archive(input_url = journal) 
 
-# we are using the journal url as input to retrieve issues
-issues <- ojsr::get_issues_from_archive(input_url = journals$url) 
+articles <- ojsr::get_articles_from_issue(input_url = issues$output_url[1:2]) # only first 2 issues
 
-# we are using the issues url we just scraped as input to retrieve articles
-articles <- ojsr::get_articles_from_issue(input_url = issues$output_url)
-
-# we are using the articles url we just scraped as the input to retrieve metadata
-metadata <- ojsr::get_html_meta_from_article(input_url = articles$output_url)
-
-# Since we are interested in summarizing and comparing by journal, we can use `ojsr::parse_base_url()` on our tables to have a binding value. 
-
-# we are including the base_url on each table to simplify joining
-journals$base_url <- ojsr::parse_base_url(journals$url)
-issues$base_url <- ojsr::parse_base_url(issues$input_url)
-articles$base_url <- ojsr::parse_base_url(articles$input_url)
-metadata$base_url <- ojsr::parse_base_url(metadata$input_url)
-
-# a journal / issue / articles / metadata table
-journals %>%
-  left_join( 
-    issues %>% count( base_url , name="n_issues") , 
-    by="base_url") %>%
-  left_join( 
-    articles %>% count( base_url , name="n_articles") , 
-    by="base_url") %>%
-  left_join( 
-    metadata %>% count( base_url , name="n_metadata") , 
-    by="base_url") %>%
-  select( name, n_issues, n_articles, n_metadata )
+metadata <- ojsr::get_html_meta_from_article(input_url = articles$output_url[1:5]) # only first 5 articles
 
 # }
 
@@ -115,9 +75,8 @@ journals %>%
 You don't need to provide the actual URL to issue archives. `get_issues_from_archive()` parses the URL you provide to compose it. 
 Then, it looks for links containing "/issue/view" in the href. Links are post-processed to comply to OJS routing conventions before returning.
 
-```{r}
-
-journal <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate' 
+```{r get_issues_from_archive , eval = FALSE }
+journal <- 'https://revistapsicologia.uchile.cl/index.php/RDP/'
 
 issues <- ojsr::get_issues_from_archive(input_url = journal)
 
@@ -134,9 +93,8 @@ The result is a long-format data frame (1 input_url may result in several rows, 
 
 You don't need to provide the actual URL of the issues' ToC, but you must provide URLs that include issue ID (articles URLs do not include this info!). `get_articles_from_issue()` parses the URL you provide to compose the ToC URL. Then, it looks for links containing "/article/view" in the href. Links are post-processed to comply to OJS routing conventions before returning.
 
-```{r}
-
-issue <- 'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65' # issue including ToC
+```{r get_articles_from_issue , eval = FALSE }
+issue <- 'https://revistapsicologia.uchile.cl/index.php/RDP/issue/view/6031/'
 
 articles <- ojsr::get_articles_from_issue(input_url = issue) 
 
@@ -153,11 +111,10 @@ The result is a long-format dataframe (1 input_url may result in several rows, o
 
 You don't need to provide the actual URL of the search result pages. `get_articles_from_search()` parses the URL you provide to compose the search result page(s) URL. If pagination is involved, necessary links are also included. Then, it looks for links containing "/article/view" in the href. Links are post-processed to comply to OJS routing conventions before returning.
 
-```{r}
-
+```{r get_articles_from_search , eval = FALSE }
 journal <- 'https://revistapsicologia.uchile.cl/index.php/RDP/'
 
-criteria <- "psicologia"
+criteria <- "psicologia+social"
 
 articles_search <- ojsr::get_articles_from_search(input_url = journal, search_criteria = criteria)
 
@@ -176,8 +133,7 @@ The result is a long-format dataframe (1 input_url may result in several rows, o
 
 You may provide any article-level URL (article abstract view, inline view, PDF direct download, etc.). `get_galleys_from_article()` parses the URL you provide to compose the article view URL. Then, it looks for links containing "/article/view" in the href. Links are post-processed to comply to OJS routing conventions before returning (i.e., having a galley ID).
 
-```{r}
-
+```{r get_galleys_from_article , eval = FALSE }
 article <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # inline reader
 
 galleys <- ojsr::get_galleys_from_article(input_url = article) 
@@ -197,9 +153,8 @@ The result is a long-format dataframe (1 input_url may result in several rows, o
 
 You may provide any article-level URL (article abstract view, inline view, PDF direct download, etc.). `get_html_meta_from_article()` parses the URL you provide to compose the URL of the article view. Then, it looks for \<meta\> tags in the \<head\> section of the HTML. **Important!** This may not only retrieve bibliographic metadata; any other "meta" property detailed on the HTML will be obtained (e.g., descriptions for propagation on social network, etc.).
 
-```{r}
-
-article <- 'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137'
+```{r get_html_meta_from_article , eval = FALSE }
+article <- 'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/75178'
 
 metadata <- ojsr::get_html_meta_from_article(input_url = article) 
 
@@ -219,8 +174,7 @@ An alternative to web scraping metadata from the article pages HTML is to retrie
 
 `get_oai_meta_from_article()` will try to access the OAI records within the OJS for any article (e.g., <https://fundacionmenteclara.org.ar/revista/index.php/RCA/oai/?verb=GetRecord&identifier=oai:ojs.fundacionmenteclara.org.ar:article/43&metadataPrefix=oai_dc>) whose URL you have provided.
 
-```{r}
-
+```{r get_oai_meta_from_article , eval = FALSE }
 article <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
 
 metadata_oai <- ojsr::get_oai_meta_from_article(input_url = article)
@@ -241,11 +195,10 @@ The result is a long-format dataframe (1 input_url may result in several rows, o
 
 `parse_base_url()` takes a vector of OJS URLs and retrieves their base URL, according to OJS routing conventions.
 
-```{r}
-
+```{r parse_base_url , eval = FALSE }
 mix_links <- c(
    'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
-   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
+   'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/75178'
 )
 
 base_url <- ojsr::parse_base_url(input_url = mix_links)
@@ -258,11 +211,10 @@ The result is a vector of the same length of your input.
 
 `parse_oai_url()` takes a vector of OJS URLs and retrieves their OAI entry URL, according to OJS routing conventions.
 
-```{r}
-
+```{r parse_oai_url , eval = FALSE }
 mix_links <- c(
    'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
-   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
+   'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/75178'
 )
 
 oai_url <- ojsr::parse_oai_url(input_url = mix_links)

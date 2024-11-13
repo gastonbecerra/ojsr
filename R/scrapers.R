@@ -8,11 +8,8 @@
 #'
 #' @examples
 #' \donttest{
-#' journals <- c(
-#'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
-#'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
-#' )
-#' issues <- ojsr::get_issues_from_archive(input_url = journals, verbose = TRUE)
+#' journal <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive'
+#' issues <- ojsr::get_issues_from_archive(input_url = journal)
 #' }
 #'
 #' @export
@@ -36,11 +33,8 @@ get_issues_from_archive <- function ( input_url , verbose = FALSE ) {
 #'
 #' @examples
 #' \donttest{
-#' issues <- c(
-#'    'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65',
-#'    'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31'
-#' )
-#' articles <- ojsr::get_articles_from_issue(input_url = issues, verbose = TRUE)
+#' issue <- 'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65'
+#' articles <- ojsr::get_articles_from_issue(input_url = issue)
 #' }
 #' @export
 #'
@@ -65,11 +59,8 @@ get_articles_from_issue <- function ( input_url , verbose = FALSE ) {
 #'
 #' @examples
 #' \donttest{
-#' articles <- c(
-#'   'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657',
-#'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
-#' )
-#' galleys <- ojsr::get_galleys_from_article(input_url = articles,verbose = TRUE)
+#' article <- 'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657'
+#' galleys <- ojsr::get_galleys_from_article(input_url = article)
 #' }
 #' @export
 get_galleys_from_article <- function ( input_url , verbose = FALSE ) {
@@ -200,11 +191,8 @@ get_articles_from_search <- function ( input_url , search_criteria, verbose = FA
 #'
 #' @examples
 #' \donttest{
-#' articles <- c(
-#'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
-#'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
-#' )
-#' metadata <- ojsr::get_html_meta_from_article(articles, verbose = TRUE)
+#' article <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
+#' metadata <- ojsr::get_html_meta_from_article(article)
 #' }
 #' @importFrom magrittr %>%
 #' @export
@@ -304,11 +292,8 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 #'
 #' @examples
 #' \donttest{
-#' articles <- c(
-#'   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
-#'   'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
-#' )
-#' metadata_oai <- ojsr::get_oai_meta_from_article(input_url = articles, verbose = TRUE)
+#' articles <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
+#' metadata_oai <- ojsr::get_oai_meta_from_article(input_url = article)
 #' }
 #' @importFrom magrittr %>%
 #' @export

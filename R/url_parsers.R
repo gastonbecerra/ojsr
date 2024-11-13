@@ -131,6 +131,7 @@ process_urls <- function( url ) {
 
         ojs_url$conventional_article <- ifelse( !is.na(ojs_url$article_id), paste0(ojs_url_base_url , "/article/view/", ojs_url$article_id), NA)
         ojs_url$conventional_issue <- ifelse( !is.na(ojs_url$issue_id), paste0(ojs_url_base_url , "/issue/view/", ojs_url$issue_id , "/showToc"), NA)
+        ojs_url$conventional_issue <- ifelse( !is.na(ojs_url$issue_id), paste0(ojs_url_base_url , "/issue/view/", ojs_url$issue_id ), NA)
         ojs_url$conventional_oai <- paste0(ojs_url_base_url , "/oai")
         ojs_url$conventional_search <- paste0(ojs_url_base_url , "/search/?query=")
         ojs_url$conventional_archive <- paste0(ojs_url_base_url , "/issue/archive")
