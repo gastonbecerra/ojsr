@@ -2,6 +2,13 @@
 
 ### 24/01/28
 
+- Ensured graceful failure with informative messages when Internet resources are unavailable
+
+Fixed in DESCRIPTION:
+- removed unused LazyData: true
+
+### 24/01/28
+
 - Corrected the alias issue, by creating ojsr-package.R
 - Removed tidyverse from suggested imports
 - included repo/issues links in descriptions

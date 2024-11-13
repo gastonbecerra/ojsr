@@ -19,11 +19,8 @@ Takes a vector of OJS URLs and scrapes the issues URLs from the issue archive.
 }
 \examples{
 \donttest{
-journals <- c(
-  'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive',
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2903'
-)
-issues <- ojsr::get_issues_from_archive(input_url = journals, verbose = TRUE)
+journal <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/issue/archive'
+issues <- ojsr::get_issues_from_archive(input_url = journal)
 }
 
 }

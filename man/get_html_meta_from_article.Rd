@@ -21,10 +21,7 @@ Takes a vector of OJS URLs and scrapes all metadata written in HTML from the art
 }
 \examples{
 \donttest{
-articles <- c(
-  'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/article/view/2137', # article
-  'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311' # xml galley
-)
-metadata <- ojsr::get_html_meta_from_article(articles, verbose = TRUE)
+article <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
+metadata <- ojsr::get_html_meta_from_article(article)
 }
 }

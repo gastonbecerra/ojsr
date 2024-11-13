@@ -20,10 +20,7 @@ Takes a vector of OJS URLs and scrapes all the galleys URLs from the article vie
 }
 \examples{
 \donttest{
-articles <- c(
-  'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657',
-  'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
-)
-galleys <- ojsr::get_galleys_from_article(input_url = articles,verbose = TRUE)
+article <- 'https://revistapsicologia.uchile.cl/index.php/RDP/article/view/55657'
+galleys <- ojsr::get_galleys_from_article(input_url = article)
 }
 }

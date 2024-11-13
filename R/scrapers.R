@@ -292,7 +292,7 @@ get_html_meta_from_article <- function ( input_url , verbose = FALSE) {
 #'
 #' @examples
 #' \donttest{
-#' articles <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
+#' article <- 'https://dspace.palermo.edu/ojs/index.php/psicodebate/article/view/516/311'
 #' metadata_oai <- ojsr::get_oai_meta_from_article(input_url = article)
 #' }
 #' @importFrom magrittr %>%

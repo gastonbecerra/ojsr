@@ -8,3 +8,4 @@ cran-comments.md
 ^caso_uso$
 ^\.github$
 ^CRAN-SUBMISSION$
+^cran-comments\.md$

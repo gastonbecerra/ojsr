@@ -19,10 +19,7 @@ Takes a vector of OJS (issue) URLs and scrapes the links to articles from the is
 }
 \examples{
 \donttest{
-issues <- c(
-   'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65',
-   'https://publicaciones.sociales.uba.ar/index.php/psicologiasocial/issue/view/31'
-)
-articles <- ojsr::get_articles_from_issue(input_url = issues, verbose = TRUE)
+issue <- 'https://revistas.ucn.cl/index.php/saludysociedad/issue/view/65'
+articles <- ojsr::get_articles_from_issue(input_url = issue)
 }
 }

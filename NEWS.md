@@ -1,3 +1,7 @@
+# ojsr 0.1.5
+
+* Ensured graceful failure with when Internet resources are unavailable
+
 # ojsr 0.1.4
 
 * Removed travis CI

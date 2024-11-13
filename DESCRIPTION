@@ -1,7 +1,7 @@
 Package: ojsr
 Type: Package
 Title: Crawler and Data Scraper for Open Journal System ('OJS')
-Version: 0.1.4
+Version: 0.1.5
 Authors@R: person("Gaston", "Becerra", email = "gaston.becerra@gmail.com",
   role = c("aut", "cre"),
   comment = c(ORCID = "0000-0001-9432-8848"))
